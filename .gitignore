@@ -1,2 +1,5 @@
 .DS_Store
 *.pyc
+conf/conf.py
+packages/j3m/conf/conf.properties
+packages/j3m/conf/ubuntu.properties
