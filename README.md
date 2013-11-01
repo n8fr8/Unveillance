@@ -49,3 +49,21 @@ Forms:
 
 We support OpenJDK/JavaRosa forms.  For more information on how to generate them, please visit http://www.kobotoolbox.org/
 Subsequent versions of this package will include a form generator, but for now, you're on your own.
+
+#USAGE
+
+To install:
+
+        cd /scripts/py
+        sudo unveillance.py install
+
+To run:
+
+        cd /scripts/py
+        sudo unveillance.py run
+
+To stop:
+
+        cd /scripts/py
+        sudo unveillance.py stop
+
