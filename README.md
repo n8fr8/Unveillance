@@ -48,7 +48,7 @@ Authentication:
 Forms:
 
 We support OpenJDK/JavaRosa forms.  For more information on how to generate them, please visit http://www.kobotoolbox.org/
-Subsequent versions of this package will include a form generator, but for now, you're on your own.
+Subsequent versions of this package will include a form generator, but for now, you're on your own.  All forms MUST be placed in /forms
 
 #USAGE
 
