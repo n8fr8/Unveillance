@@ -52,7 +52,7 @@ Subsequent versions of this package will include a form generator, but for now, 
 
 #USAGE
 
-To install:
+To install (no need to run after install-- it already does):
 
         cd /scripts/py
         sudo unveillance.py install
