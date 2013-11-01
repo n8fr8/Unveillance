@@ -1,0 +1,12 @@
+[submodule "packages/tornado"]
+	path = packages/tornado
+	url = git@github.com:facebook/tornado.git
+[submodule "packages/FFmpeg"]
+	path = packages/FFmpeg
+	url = git@github.com:FFmpeg/FFmpeg.git
+[submodule "packages/filemagic"]
+	path = packages/filemagic
+	url = git@github.com:aliles/filemagic.git
+[submodule "packages/requests"]
+	path = packages/requests
+	url = git@github.com:kennethreitz/requests.git
