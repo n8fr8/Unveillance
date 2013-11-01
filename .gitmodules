@@ -10,3 +10,9 @@
 [submodule "packages/requests"]
 	path = packages/requests
 	url = git@github.com:kennethreitz/requests.git
+[submodule "packages/fabric"]
+	path = packages/fabric
+	url = git@github.com:fabric/fabric.git
+[submodule "packages/elasticsearch"]
+	path = packages/elasticsearch
+	url = git@github.com:elasticsearch/elasticsearch.git
