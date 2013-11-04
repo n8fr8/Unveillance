@@ -1,4 +1,5 @@
-import signal, sys
+import signal, sys, copy
+from base64 import b64encode
 
 import tornado.ioloop
 import tornado.web
@@ -7,7 +8,7 @@ import tornado.httpserver
 from conf import scripts_home, public, invalidate, submissions_dump, api as api_prefs
 from InformaCamModels.source import Source as ICSource
 from InformaCamModels.submission import Submission as ICSubmission
-from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter
+from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
 from InformaCamUtils.elasticsearch import Elasticsearch
 
 def terminationHandler(signal, frame):
@@ -19,6 +20,14 @@ class Res():
 	
 	def emit(self):
 		return self.__dict__
+
+class GenerateICTD(tornado.web.RequestHandler):
+	def get(self):
+		res = Res()
+		res.result = 200
+		res.data = ictd
+		
+		self.write(res.emit())
 
 class Ping(tornado.web.RequestHandler):
 	def get(self):
@@ -236,13 +245,19 @@ routes = [
 	(r"/sources/", Sources),
 	(r"/source/([a-zA-Z0-9]{32})/", Source, dict(_id=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/media/(low|med|high|thumb)/", MediaHandler, dict(_id=None, resolution=None)),
-	(r"/submission/([a-zA-Z0-9]{32})/j3m/", J3MHandler, dict(_id=None))
+	(r"/submission/([a-zA-Z0-9]{32})/j3m/", J3MHandler, dict(_id=None)),
+	(r"/ictd/", GenerateICTD)
 ]
 
 api = tornado.web.Application(routes)
 signal.signal(signal.SIGINT, terminationHandler)
 
-if __name__ == "__main__":	
+if __name__ == "__main__":
+	ictd = copy.deepcopy(public)
+	ictd['publicKey'] = c64encode(gzipAsset(public['publicKey']))
+	for f, form in enumerate(public['forms']):
+		ictd['forms'][f] = b64encode(gzipAsset(form))
+
 	server = tornado.httpserver.HTTPServer(api)
 	server.bind(api_prefs['port'])
 	server.start(api_prefs['num_processes'])
