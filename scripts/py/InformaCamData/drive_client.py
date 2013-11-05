@@ -37,11 +37,6 @@ class DriveClient(InformaCamDataClient):
 		self.mime_types['folder'] = "application/vnd.google-apps.folder"
 		self.mime_types['file'] = "application/vnd.google-apps.file"
 		
-		self.absorbedByInformaCam = []
-		files = self.service.children().list(folderId=drive['asset_root']).execute()
-		for f in files['items']:
-			self.absorbedByInformaCam.append(f['id'])
-		
 	def getAssetMimeType(self, fileId):
 		super(DriveClient, self).getAssetMimeType(fileId)
 		
@@ -100,7 +95,7 @@ class DriveClient(InformaCamDataClient):
 		files = self.service.files().list(**q).execute()
 		for f in files['items']:
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
-				if f['id'] in self.absorbedByInformaCam:
+				if self.isCopied(f['id']):
 					continue
 					
 				try:
@@ -119,6 +114,16 @@ class DriveClient(InformaCamDataClient):
 						body={'id':clone['id']}
 					).execute()
 					sleep(2)
+					
+					as_copied = {
+						'key' : drive['copied_flag'],
+						'value' : True,
+						'visibility' : 'PUBLIC'
+					}
+		 
+					tag = self.service.properties().insert(fileId=f['id'], body=as_copied).execute()
+					print tag
+		
 				except errors.HttpError as e:
 					print e
 					continue
@@ -154,6 +159,26 @@ class DriveClient(InformaCamDataClient):
 			pass
 			
 		return False
+		
+	def isCopied(self, file):
+		if type(file) is str or type(file) is unicode:
+			return self.isCopied(self.getFile(file))
+		
+		try:
+			p = self.service.properties().get(
+				fileId = file['id'],
+				propertyKey = drive['copied_flag'],
+				visibility = 'PUBLIC'
+			).execute()
+			
+			if p['value'] == "true":
+				return True
+		
+		except errors.HttpError, e:
+			pass
+		except TypeError, e:
+			print e
+			pass
 		
 	def absorb(self, file):
 		if type(file) is str or type(file) is unicode:

@@ -181,7 +181,7 @@ if __name__ == "__main__":
 		sleep(2)
 	
 	print "Processing new keys..."
-	#watch(only_sources=True)
+	watch(only_sources=True)
 	print "done.\n"
 	
 	print "Starting intake daemon..."
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 	print "Starting web client.."
 	p = Process(target=startAPI)
 	p.start()
-		print "done.\n"
+	print "done.\n"
 	
 	print "Welcome to Unveillance.\n\n"
 	
