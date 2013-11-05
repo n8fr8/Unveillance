@@ -1,4 +1,5 @@
 import httplib2, json
+from time import sleep
 
 from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import OAuth2WebServerFlow
@@ -35,6 +36,11 @@ class DriveClient(InformaCamDataClient):
 		
 		self.mime_types['folder'] = "application/vnd.google-apps.folder"
 		self.mime_types['file'] = "application/vnd.google-apps.file"
+		
+		self.absorbedByInformaCam = []
+		files = self.service.children().list(folderId=drive['asset_root']).execute()
+		for f in files['items']:
+			self.absorbedByInformaCam.append(f['id'])
 		
 	def getAssetMimeType(self, fileId):
 		super(DriveClient, self).getAssetMimeType(fileId)
@@ -86,13 +92,43 @@ class DriveClient(InformaCamDataClient):
 		super(DriveClient, self).listAssets(omit_absorbed)
 		
 		assets = []
+		
+		'''
+		get all sharedToMe
+		'''
+		q = {'q' : 'sharedWithMe'}
+		files = self.service.files().list(**q).execute()
+		for f in files['items']:
+			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
+				if f['id'] in self.absorbedByInformaCam:
+					continue
+					
+				try:
+					clone = self.service.files().copy(
+						fileId=f['id'],
+						body={'title':f['title']}
+					).execute()
+					sleep(2)
+				except errors.HttpError as e:
+					print e
+					continue
+				
+				try:
+					clone = self.service.children().insert(
+						folderId=drive['asset_root'], 
+						body={'id':clone['id']}
+					).execute()
+					sleep(2)
+				except errors.HttpError as e:
+					print e
+					continue
+
 		files = self.service.children().list(folderId=drive['asset_root']).execute()
 		for f in files['items']:	
 			if omit_absorbed and self.isAbsorbed(f['id']):
 				continue
 				
 			assets.append(f['id'])
-			
 		return assets
 		
 	def isAbsorbed(self, file):		
