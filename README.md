@@ -21,7 +21,6 @@ Install python-gnupg
 
 	cd packages/python-gnupg
 	sudo make install
-	sudo make test
 
 Install FFmpeg
 
