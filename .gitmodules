@@ -16,3 +16,6 @@
 [submodule "packages/elasticsearch"]
 	path = packages/elasticsearch
 	url = git@github.com:elasticsearch/elasticsearch.git
+[submodule "packages/python-gnugp"]
+	path = packages/python-gnugp
+	url = git@github.com:isislovecruft/python-gnupg.git
