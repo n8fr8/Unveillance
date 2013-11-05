@@ -142,6 +142,22 @@ if __name__ == "__main__":
 		sys.exit(0)
 		
 	print "Starting up your database..."
+	if mode == 1:
+		el_suffix = "-0.90.6"
+		download = "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch%s.zip" % el_suffix
+		package_path = os.path.abspath(os.path.join(elasticsearch_home, os.pardir))
+		cmds = [
+			["wget", "-O", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix), download],
+			["unzip", "-d", package_path, "-o", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)],
+			["mv", "%s%s" %(elasticsearch_home[:-1], el_suffix), elasticsearch_home],
+			["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
+		]
+		
+		for cmd in cmds:
+			el_install = ShellThreader(cmd)
+			el_install.start()
+			el_install.join()
+			
 	print "please wait..."
 	p = Process(target=startElasticsearch)
 	p.start()
@@ -156,7 +172,7 @@ if __name__ == "__main__":
 		sec.close()
 		print "done.\n"
 	
-		print "Initializing databases..."
+		print "Initializing databases..."		
 		initElasticsearch()
 		print "done.\n"
 		
@@ -165,7 +181,7 @@ if __name__ == "__main__":
 		sleep(2)
 	
 	print "Processing new keys..."
-	watch(only_sources=True)
+	#watch(only_sources=True)
 	print "done.\n"
 	
 	print "Starting intake daemon..."
@@ -176,7 +192,7 @@ if __name__ == "__main__":
 	print "Starting web client.."
 	p = Process(target=startAPI)
 	p.start()
-	print "done.\n"
+		print "done.\n"
 	
 	print "Welcome to Unveillance.\n\n"
 	
