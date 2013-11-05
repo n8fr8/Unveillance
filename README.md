@@ -8,14 +8,20 @@ After cloning, run
 
     git submodules --init --recursive
 
+Install dependencies (not included in packaging):
+
+    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools
+
 Install tornado, requests, filemagic, and fabric
 
     cd packages/[package]
     sudo python setup.py install
 
-Install FFmpeg dependencies (not included in packaging):
+Install python-gnupg
 
-    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev
+	cd packages/python-gnupg
+	sudo make install
+	sudo make test
 
 Install FFmpeg
 

@@ -1,6 +1,5 @@
 import os, sys, time, re
 
-from daemon import runner
 from base64 import b64encode
 
 from InformaCamModels.source import Source
