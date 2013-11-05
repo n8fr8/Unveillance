@@ -97,7 +97,13 @@ class Elasticsearch():
 		
 		if reindex:
 			r = requests.delete(self.el)
-			print r.text
+			res = json.loads(r.text)
+			try:
+				if res['error'] == "IndexMissingException[[informacam] missing]":
+					pass
+			except KeyError as e:
+				print r.text
+					
 		
 		r = requests.put(self.el, data=json.dumps(mappings))
 		res = json.loads(r.text)
