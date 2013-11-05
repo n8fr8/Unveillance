@@ -54,7 +54,7 @@ class J3M(Asset):
 				data_clone.close()
 													
 				print signature
-				gpg = gnupg.GPG(gnupghome=gnupg_home)
+				gpg = gnupg.GPG(homedir=gnupg_home)
 				verified = gpg.verify_file(StringIO(signature), d_clone)
 				
 				if verified.fingerprint is None:

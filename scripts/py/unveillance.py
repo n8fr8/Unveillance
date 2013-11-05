@@ -150,11 +150,7 @@ if __name__ == "__main__":
 	
 	if mode == 1:
 		print "Installing your secret key..."
-		gpg = gnupg.GPG(gpgbinary='/usr/bin/gpg',
-			gpghome=gnupg_home
-			pubring='pubring.gpg',
-			secring='secring.gpg')
-	
+		gpg = gnupg.GPG(homedir=gnupg_home)	
 		sec = open(secret_key_path, 'rb')
 		import_key = gpg.import_keys(sec.read())
 		sec.close()
