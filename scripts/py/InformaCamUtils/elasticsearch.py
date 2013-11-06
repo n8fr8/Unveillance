@@ -5,7 +5,7 @@ class Elasticsearch():
 		sys.path.insert(0, os.path.abspath('.'))
 		from InformaCamModels.asset import Asset
 		
-		self.el = "http://localhost:9200/informacam/"
+		self.el = "http://localhost:9200/unveillance/"
 		if river is not None:
 			self.river = river
 			
@@ -53,43 +53,41 @@ class Elasticsearch():
 	
 	def createIndex(self, reindex=True):
 		mappings = {
-			"mappings" : {
-				"j3m" : {
-					"properties" : {
-						"data" : {
-							"properties" : {
-								"exif" : {
-									"properties" : {
-										"location" : {
-											"type" : "geo_point"
-										}
+			"j3m" : {
+				"properties" : {
+					"data" : {
+						"properties" : {
+							"exif" : {
+								"properties" : {
+									"location" : {
+										"type" : "geo_point"
 									}
-								},
-								"sensorCapture" : {
-									"type" : "nested",
-									"include_in_parent" : True,
-									"include_in_root" : True,
-									"properties" : {
-										"sensorPlayback" : {
-											"type" : "nested",
-											"include_in_parent" : True,
-											"include_in_root" : True,
-											"properties" : {
-												"gps_coords" : {
-													"type" : "geo_point"
-												},
-												"regionLocationData" : {
-													"properties" : {
-														"gps_coords" : {
-															"type" : "geo_point"
-														}
+								}
+							},
+							"sensorCapture" : {
+								"type" : "nested",
+								"include_in_parent" : True,
+								"include_in_root" : True,
+								"properties" : {
+									"sensorPlayback" : {
+										"type" : "nested",
+										"include_in_parent" : True,
+										"include_in_root" : True,
+										"properties" : {
+											"gps_coords" : {
+												"type" : "geo_point"
+											},
+											"regionLocationData" : {
+												"properties" : {
+													"gps_coords" : {
+														"type" : "geo_point"
 													}
-												},
-												"visibleWifiNetworks" : {
-													"type" : "nested",
-													"include_in_parent" : True,
-													"include_in_root" : True
 												}
+											},
+											"visibleWifiNetworks" : {
+												"type" : "nested",
+												"include_in_parent" : True,
+												"include_in_root" : True
 											}
 										}
 									}
@@ -110,8 +108,14 @@ class Elasticsearch():
 			except KeyError as e:
 				print r.text
 					
-		
-		r = requests.put(self.el, data=json.dumps(mappings))
+		index = {
+			"settings" : {
+				"number_of_shards" : 6,
+				"number_of_replicas" : 4
+			},
+			"mappings" : mappings
+		}
+		r = requests.put(self.el, data=json.dumps(index))
 		res = json.loads(r.text)
 		
 		try:
