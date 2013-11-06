@@ -1,4 +1,6 @@
-import magic, os, json, sys, re
+import magic, os, json, sys, re, time
+from math import fabs
+
 from informacam_data_client import InformaCamDataClient
 from conf import globaleaks, scripts_home
 
@@ -12,12 +14,10 @@ class GlobaleaksClient(InformaCamDataClient):
 		os.chdir("%sInformaCamData" % scripts_home['python'])
 		try:
 			f = open(globaleaks['absorbed_log'], 'rb')			
-			self.absorbedByInformaCam = json.loads(f.read())
+			self.absorbedByInformaCam = int(f.read().strip())
 			f.close()
 		except:
-			self.absorbedByInformaCam = {
-				globaleaks['absorbed_flag'] : []
-			}	
+			self.absorbedByInformaCam = 0
 	
 	def sshToHost(self, function, extras=None):
 		args = [
@@ -160,41 +160,38 @@ class GlobaleaksClient(InformaCamDataClient):
 		for line in asset_thread.output:
 			l_match = re.search(re.escape(sentinel), line)
 			if l_match is not None:
-				files = line[len(sentinel) :].split("  ")
-				for file in files:
-					file = file.replace("\r","")
-					if file == " ":
-						continue
+				line = line.replace(sentinel, '').split(" ")
+				line[:] = [word for word in line if word != '']
+				
+				if line[-1] == "." or line[-1] == "..":
+					continue
+				
+				if re.match(r'^gpg_encrypted-.*', line[-1]):
+					continue
+				
+				date_str = " ".join(line[-4:-2])
+				date_admitted = time.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+				
+				if omit_absorbed and self.isAbsorbed(time.mktime(date_admitted)):
+					continue
 						
-					file = file.replace(" ","")
-										
-					if omit_absorbed and self.isAbsorbed(file):
-						continue
-						
-					assets.append(file)
+				assets.append(file)
 
+		self.absorbedByInformaCam = time.time()
+		f = open(globaleaks['absorbed_log'], 'wb+')
+		f.write(self.absorbedByInformaCam)
+		f.close()
+		
 		return assets
 		
-	def isAbsorbed(self, file):
-		super(GlobaleaksClient, self).isAbsorbed(file)
-		
-		# if we've seen the name before...
-		f = os.path.basename(file)
-		if f in self.absorbedByInformaCam[globaleaks['absorbed_flag']]:
+	def isAbsorbed(self, date_admitted):
+		if date_admitted < self.absorbedByInformaCam
 		 	return True
 		
 		return False
 
 	def absorb(self, file):
 		super(GlobaleaksClient, self).absorb(file)
-
-		self.absorbedByInformaCam[globaleaks['absorbed_flag']].append(
-			os.path.basename(file)
-		)
-		
-		f = open(globaleaks['absorbed_log'], 'wb+')
-		f.write(json.dumps(self.absorbedByInformaCam))
-		f.close()
 		
 	def getFileName(self, file):
 		super(GlobaleaksClient, self).getFileName(file)

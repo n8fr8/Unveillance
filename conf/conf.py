@@ -38,7 +38,8 @@ drive = {
 	"client_secrets" : "%sclient_secrets.json" % conf,
 	"p12" : "%sGOOGLE_DRIVE-privatekey.p12" % conf,
 	"asset_root" : "GOOGLE DRIVE ID OF FOLDER WHERE YOUR SUBMISSIONS ARE HELD",
-	"absorbed_flag" : "absorbedByInformaCam"
+	"absorbed_flag" : "absorbedByInformaCam",
+	"asset_id" : "google service account email"
 }
 
 globaleaks = {

@@ -179,6 +179,8 @@ class DriveClient(InformaCamDataClient):
 		except TypeError, e:
 			print e
 			pass
+
+		return False
 		
 	def absorb(self, file):
 		if type(file) is str or type(file) is unicode:

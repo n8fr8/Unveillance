@@ -1,4 +1,5 @@
 from fabric.api import *
+import os
 
 def init(host, user, key_filename):
 	env.hosts = [host]
@@ -10,14 +11,13 @@ def init(host, user, key_filename):
 def listAssets(host=None, user=None, key_filename=None, asset_root=None):
 	init(host, user, key_filename)
 	
-	run("sudo ls %s" % asset_root)
+	run("sudo ls -la %s --full-time" % asset_root)
 	
 def pullFile(host=None, user=None, key_filename=None, asset_root=None, file=None, asset_dump=None, local_dump=None):
 	init(host, user, key_filename)
 		
-	run("sudo cp %s%s ." % (asset_root, file))
+	run("sudo cp %s ." % os.path.join(asset_root, file))
 	run("sudo chown %(usr)s:%(usr)s %(file)s" % {'usr':user, 'file':file})
-	local("scp -i %s %s/%s %s" % (key_filename, asset_dump, file, local_dump))
+	local("scp -i %s %s %s" % (key_filename, os.path.join(asset_dump, file), local_dump))
 	run("sudo rm %s" % file)
-	
 	
