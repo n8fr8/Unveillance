@@ -25,11 +25,12 @@ j3m = {
 """
 	REPOSITORY SYNC:
 	This array can be populated with whatever repositories you currently host.  
-	So far, we support 'globaleaks' and 'google_drive'.
+	So far, we support 'globaleaks' and 'google_drive'.  You DEFINITELY SHOULD LEAVE 'import' in there; it monitors your local drive for imported media.
 	
 	All private keys should be put in your conf folder so we can reference them.
 """
 sync = [
+	'import',
 	'globaleaks'
 ]
 
@@ -49,6 +50,11 @@ globaleaks = {
 	"absorbed_log" : "%sabsorbedByInformaCam_gl.json" % assets_root,
 	"absorbed_flag" : "absorbedByInformaCam",
 	"public_url" : "http://WHATEVER_PUBLIC_URL.onion"
+}
+
+import_directory = {
+	"asset_root" : "/where/will/you/put/imported/media/",
+	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % assets_root
 }
 
 """

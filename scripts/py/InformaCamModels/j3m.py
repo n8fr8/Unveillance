@@ -70,7 +70,8 @@ class J3M(Asset):
 				print "signature already parsed"
 				pass
 			
-			print invalid
+			if invalid is not None:
+				print invalid
 			
 			try:
 				inflate = self.massageData(json.loads(data))

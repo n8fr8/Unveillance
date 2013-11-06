@@ -254,7 +254,7 @@ signal.signal(signal.SIGINT, terminationHandler)
 
 if __name__ == "__main__":
 	ictd = copy.deepcopy(public)
-	ictd['publicKey'] = c64encode(gzipAsset(public['publicKey']))
+	ictd['publicKey'] = b64encode(gzipAsset(public['publicKey']))
 	for f, form in enumerate(public['forms']):
 		ictd['forms'][f] = b64encode(gzipAsset(form))
 

@@ -1,8 +1,9 @@
-import gnupg, sys, subprocess, copy, os, signal
-from time import sleep
+import gnupg, sys, subprocess, copy, os, signal, fcntl, re
+from time import sleep, time
 from multiprocessing import Process
+from math import fabs
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, assets_root, sync_sleep, public_user, api
+from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, assets_root, sync_sleep, public_user, api, import_directory
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch
@@ -20,9 +21,14 @@ files = {
 	"elasticsearch" : {
 		"log" : "%selasticsearch_log.txt" % assets_root,
 		"pid" : "%selasticsearch_pid.txt" % assets_root,
-		"runs_on" : 9200
+		"runs_on" : 9200,
+		"status" : "%selasticsearch_status.txt" % assets_root
 	}
 }
+
+time_since_last_fired = 0.0
+time_since_last_update = 0.0
+intake_status = 0
 
 def daemonize(log_file, pid_file):
 	try:
@@ -68,16 +74,35 @@ def initFiles():
 	for file, vals in files.iteritems():
 		subprocess.Popen(["touch",vals['pid']])
 		subprocess.Popen(["touch",vals['log']])
+		try:
+			subprocess.Popen(["touch",vals['status']])
+		except KeyError as e:
+			pass
 	
 	from conf import globaleaks
 	subprocess.Popen(["touch", globaleaks['absorbed_log']])
+	subprocess.Popen(["touch", import_directory['absorbed_log']])
 	
 	from conf import j3m
 	subprocess.Popen(["chmod", "+x", "%sj3mparser/j3mparser.out" % j3m['root']])
 
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
-	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f'])
+	
+	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f'], stdout=subprocess.PIPE, close_fds=True)
+	data = p.stdout.readline()
+
+	while data:
+		if re.match(r'.*started$', data):
+			print "STARTED: %s" % data
+			f = open(files['elasticsearch']['status'], 'wb+')
+			f.write("True")
+			f.close()
+			sleep(1)
+			break
+			
+		data = p.stdout.readline()
+	p.stdout.close()
 	
 	while True:
 		pass
@@ -89,12 +114,39 @@ def startAPI():
 	while True:
 		pass
 
+def watchHandler(sigint, frame):
+	global time_since_last_fired
+	print fabs(time_since_last_fired - time())
+	time_since_last_fired = time()
+	
+
 def startIntake():
 	daemonize(files['daemon']['log'],files['daemon']['pid'])
 	
+	signal.signal(signal.SIGIO, watchHandler)
+	f = os.open(import_directory['asset_root'], os.O_RDONLY)
+	fcntl.fcntl(f, fcntl.F_SETSIG, 0)
+	fcntl.fcntl(f, fcntl.F_NOTIFY, fcntl.DN_MODIFY | fcntl.DN_MULTISHOT)
+	
+	global intake_status
+	global time_since_last_fired
+	global time_since_last_update
+	
 	while True:
-		watch()
-		sleep(sync_sleep * 60)
+		if intake_status == 0:
+			if time_since_last_fired > 0.0 and fabs(time_since_last_fired - time()) >= 1:
+				intake_status = 1
+				watch(only_imports=True)
+				intake_status = 0
+				time_since_last_fired = 0.0
+			else:
+				if fabs(time_since_last_update - time()) >= (sync_sleep * 60):
+					intake_status = 1
+					watch()
+					intake_status = 0
+					time_since_last_update = time()
+
+		sleep(1)
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
@@ -124,8 +176,16 @@ if __name__ == "__main__":
 				proc.start()
 				proc.join()
 				for pid in proc.output:
+					#print pid
 					subprocess.Popen(['kill', pid])
 
+			except KeyError as e:
+				pass
+				
+			try:
+				f = open(vals['status'], 'wb+')
+				f.write("False")
+				f.close()
 			except KeyError as e:
 				pass
 			
@@ -159,9 +219,21 @@ if __name__ == "__main__":
 			el_install.join()
 			
 	print "please wait..."
+	
 	p = Process(target=startElasticsearch)
 	p.start()
-	sleep(15)
+	
+	elasticsearch_started = False
+	while not elasticsearch_started:
+		try:
+			f = open(files['elasticsearch']['status'], 'rb')
+			elasticsearch_started = bool(f.read().strip())
+			f.close()
+		except IOError as e:
+			pass
+		
+		sleep(5)
+		
 	print "done.\n"
 	
 	if mode == 1:

@@ -37,7 +37,7 @@ class Submission(Asset):
 		# should fork here?
 		sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
 		from funcs import ShellThreader
-				
+	
 		j3m_thread = ShellThreader([
 			"java", "-cp", j3m['classpath'],
 			"framework.MediaProcessor", "%s/%s" % (self.asset_path, self.file_name),

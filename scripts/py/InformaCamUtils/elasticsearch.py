@@ -13,10 +13,16 @@ class Elasticsearch():
 		r = requests.get("%s%s/%s" % (self.el, river, _id))
 		res = json.loads(r.text)
 		
-		if res['exists']:
-			return res['_source']
-		else:
-			return None
+		print res
+		
+		try:
+			if res['exists']:
+				return res['_source']
+		except KeyError as e:
+			print e
+			pass
+			
+		return None
 
 	def delete(self, asset):
 		r = requests.delete("%s%s/%s" % (self.el, self.river, asset._id))

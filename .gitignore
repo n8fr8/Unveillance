@@ -1,7 +1,8 @@
 .DS_Store
 *.pyc
-conf/conf.py
+conf/*
 packages/j3m/conf/conf.properties
 packages/j3m/conf/ubuntu.properties
 forms/*
 packages/elasticsearch*
+scripts/py/test.py

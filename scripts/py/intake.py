@@ -1,24 +1,31 @@
 import os, sys, time, re
 
 from base64 import b64encode
+from requests import exceptions
 
 from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
 from conf import sync, sync_sleep, assets_root, j3m, scripts_home
 
-def watch(only_sources=False):
+def watch(only_sources=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.
 	
 	"""
 	print "running watch..."
 	clients = []
+	
 	for sync_type in sync:
 		if sync_type == "drive":
-			from InformaCamData.drive_client import DriveClient	
-			clients.append(DriveClient())
+			if not only_imports:
+				from InformaCamData.drive_client import DriveClient	
+				clients.append(DriveClient())
 		elif sync_type == "globaleaks":
-			from InformaCamData.globaleaks_client import GlobaleaksClient
-			clients.append(GlobaleaksClient())
+			if not only_imports:
+				from InformaCamData.globaleaks_client import GlobaleaksClient
+				clients.append(GlobaleaksClient())
+		elif sync_type == "import":
+			from InformaCamData.import_client import ImportClient
+			clients.append(ImportClient())
 	
 	for client in clients:
 		for asset in client.listAssets(omit_absorbed=True):		
@@ -30,14 +37,21 @@ def watch(only_sources=False):
 				'_id' : client.getFileNameHash(asset),
 				'file_name' : client.getFileName(asset),
 				'mime_type' : mime_type,
-				'package_content' : b64encode(client.pullFile(asset)).rstrip("=")
+				'package_content' : b64encode(client.pullFile(asset)).rstrip("="),
+				'sync_source' : sync_type
 			}
+			print data['file_name']
 			
 			if mime_type == client.mime_types['zip']:
 				del data['mime_type']
 				print "it is a source"
 				
-				source = Source(inflate=data)
+				try:
+					source = Source(inflate=data)
+				except exceptions.ConnectionError as e:
+					print e
+					sys.exit(0)
+					
 				if hasattr(source, "invalid"):
 					print source.invalid
 					continue
@@ -48,8 +62,13 @@ def watch(only_sources=False):
 					
 				del data['mime_type']
 				print "it is a j3m"
-								
-				j3m = J3M(inflate=data)
+				
+				try:			
+					j3m = J3M(inflate=data)
+				except exceptions.ConnectionError as e:
+					print e
+					sys.exit(0)
+					
 				if hasattr(j3m, "invalid"):
 					print source.invalid
 					continue
@@ -65,10 +84,18 @@ def watch(only_sources=False):
 					)
 				print "it is a sub: %s" % data['file_name']
 				
-				submission = Submission(inflate=data)
+				try:
+					submission = Submission(inflate=data)
+				except exceptions.ConnectionError as e:
+					print e
+					sys.exit(0)
+					
 				if hasattr(submission, "invalid"):
 					print submission.invalid
 					continue
 
 			client.absorb(asset)
 			client.lockFile(asset)
+
+if __name__ == "__main__":
+	watch()

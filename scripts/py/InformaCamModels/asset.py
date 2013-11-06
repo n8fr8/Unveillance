@@ -7,7 +7,7 @@ from conf import invalidate, scripts_home, public_user
 __metaclass__ = type
 
 emit_omits = ['emit_omits','es','_id', 'locked_fields']
-locked_fields = ['asset_path', 'file_name', 'date_admitted']
+locked_fields = ['asset_path', 'file_name', 'date_admitted', 'sync_source']
 
 class Asset():
 	def __init__(self, inflate=None, _id=None, extra_omits=None, extra_fields=None, river=None):

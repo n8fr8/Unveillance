@@ -32,6 +32,7 @@ Install FFmpeg
 Install FFmpeg2theora (not included in packaging):
 
     sudo apt-get install ffmpeg2theora
+
     
 Config:
 
