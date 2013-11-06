@@ -22,7 +22,7 @@ class Source(Asset):
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Source, self).makeDir("%ssources/%s" % (assets_root, self._id))
+			super(Source, self).makeDir(os.path.join("%ssources" % assets_root, self._id))
 			
 		if package_content is not None:
 			if self.addFile(self.file_name, package_content):
@@ -37,7 +37,7 @@ class Source(Asset):
 			"-d", 
 			self.asset_path
 		])
-		self.importKey("%s/publicKey" % self.asset_path)
+		self.importKey(os.path.join(self.asset_path, "publicKey"))
 		
 		# all the base images
 		self.baseImage = []
@@ -47,7 +47,7 @@ class Source(Asset):
 				if is_base_image:
 					self.baseImage.append("%s/%s" % (self.asset_path, str(file)))
 		
-		c = open("%s/credentials" % self.asset_path, 'rb')
+		c = open(os.path.join(self.asset_path, "credentials") , 'rb')
 		credentials = json.loads(c.read())
 		c.close()
 		

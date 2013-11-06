@@ -72,7 +72,7 @@ class Asset():
 			content += "=" * ((4 - len(content) % 4) % 4)
 			content = base64.b64decode(content)
 			
-		file = open("%s/%s" % (self.asset_path, file_name), 'wb+')
+		file = open(os.path.join(self.asset_path, file_name), 'wb+')
 		file.write(content)
 		file.close()
 

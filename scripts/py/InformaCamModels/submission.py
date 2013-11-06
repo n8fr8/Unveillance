@@ -21,7 +21,7 @@ class Submission(Asset):
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Submission, self).makeDir("%ssubmissions/%s" % (assets_root, self._id))
+			super(Submission, self).makeDir(os.path.join("%submissions" % asset_root, self._id))
 		
 		if package_content is not None:
 			if self.addFile(self.file_name, package_content) and self.importAssets(self.file_name):
@@ -35,7 +35,7 @@ class Submission(Asset):
 			
 	def importAssets(self, file_name):		
 		# should fork here?
-		sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
+		sys.path.insert(0, os.path.join(scripts_home['python'], "InformaCamUtils"))
 		from funcs import ShellThreader
 	
 		j3m_thread = ShellThreader([
@@ -46,7 +46,8 @@ class Submission(Asset):
 		j3m_thread.start()
 		j3m_thread.join()
 		
-		j3m_ = J3M(path_to_j3m="%s/%sjson" % (self.asset_path, self.file_name[:-3]))
+		
+		j3m_ = J3M(path_to_j3m=os.path.join(self.asset_path, "%sjson" % self.file_name[:-3]))
 		try:
 			self.j3m_id = j3m_._id
 			self.save()

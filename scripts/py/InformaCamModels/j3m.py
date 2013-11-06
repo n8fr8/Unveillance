@@ -47,7 +47,7 @@ class J3M(Asset):
 				import gnupg
 				from conf import gnupg_home
 
-				d_clone = "%s/tmp/%s.json" % (assets_root, inflate['file_name'])
+				d_clone = os.path.join("%s/tmp/" % assets_root, "%s.json" % inflate['file_name'])
 
 				data_clone = open(d_clone, 'wb+')
 				data_clone.write(json.dumps(data_))
@@ -87,7 +87,7 @@ class J3M(Asset):
 		else:
 			if file_name is not None:
 				self.file_name = file_name
-				super(J3M, self).makeDir("%ssubmissions/%s" % (assets_root, self._id))
+				super(J3M, self).makeDir(os.path.join("%ssubmissions" % assets_root, self._id))
 				super(J3M, self).addFile(
 					file_name, 
 					base64.b64encode(
