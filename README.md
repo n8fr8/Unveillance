@@ -6,7 +6,7 @@ You should already have Java installed (OpenJRE 7 is what I like) and JAVA_HOME 
 
 After cloning, run
 
-    git submodules update --init --recursive
+    git submodule update --init --recursive
 
 Install dependencies (not included in packaging):
 
