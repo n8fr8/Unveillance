@@ -130,7 +130,7 @@ def watchHandler(sigint, frame):
 	
 
 def startIntake():
-	#daemonize(files['daemon']['log'],files['daemon']['pid'])
+	daemonize(files['daemon']['log'],files['daemon']['pid'])
 	
 	signal.signal(signal.SIGIO, watchHandler)
 	f = os.open(import_directory['asset_root'], os.O_RDONLY)
