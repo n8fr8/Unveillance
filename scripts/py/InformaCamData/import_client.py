@@ -113,3 +113,6 @@ class ImportClient(InformaCamDataClient):
 			return True
 		
 		return False
+	
+	def updateLog(self):
+		super(ImportClient, self).updateLog(import_directory['absorbed_log'])

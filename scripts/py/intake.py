@@ -106,6 +106,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 
 			client.absorb(asset)
 			client.lockFile(asset)
+		client.updateLog()
 
 if __name__ == "__main__":
 	watch()

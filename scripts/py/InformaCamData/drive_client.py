@@ -180,3 +180,6 @@ class DriveClient(InformaCamDataClient):
 			
 		name_base = file['id']	
 		return super(DriveClient, self).getFileNameHash(name_base)
+	
+	def updateLog(self):
+		super(DriveClient, self).updateLog(drive['absorbed_log'])

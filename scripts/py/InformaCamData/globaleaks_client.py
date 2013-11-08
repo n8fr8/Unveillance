@@ -190,3 +190,6 @@ class GlobaleaksClient(InformaCamDataClient):
 	
 	def getFileNameHash(self, file):
 		return super(GlobaleaksClient, self).getFileNameHash(file)
+	
+	def updateLog(self):
+		super(GlobaleaksClient, self).updateLog(globaleaks['absorbed_log'])
