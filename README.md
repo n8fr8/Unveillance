@@ -11,6 +11,7 @@ After cloning, run
 Install dependencies (not included in packaging):
 
     sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools
+    easy_install --upgrade google-api-python-client
 
 Install tornado, requests, filemagic, and fabric
 
