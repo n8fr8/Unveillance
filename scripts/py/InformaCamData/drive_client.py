@@ -1,5 +1,5 @@
-import httplib2, json
-from time import sleep
+import httplib2, json, datetime
+from time import sleep, strptime, mktime
 
 from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import OAuth2WebServerFlow
@@ -36,6 +36,13 @@ class DriveClient(InformaCamDataClient):
 		
 		self.mime_types['folder'] = "application/vnd.google-apps.folder"
 		self.mime_types['file'] = "application/vnd.google-apps.file"
+		
+		try:
+			f = open(drive['absorbed_log'], 'rb')
+			self.absorbedByInformaCam = int(f.read().strip())
+			f.close()
+		except:
+			self.absorbedByInformaCam = 0
 		
 	def getAssetMimeType(self, fileId):
 		super(DriveClient, self).getAssetMimeType(fileId)
@@ -87,6 +94,7 @@ class DriveClient(InformaCamDataClient):
 		super(DriveClient, self).listAssets(omit_absorbed)
 		
 		assets = []
+		new_time = 0
 		
 		'''
 		get all sharedToMe
@@ -95,8 +103,6 @@ class DriveClient(InformaCamDataClient):
 		files = self.service.files().list(**q).execute()
 		for f in files['items']:
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
-				if self.isCopied(f['id']):
-					continue
 					
 				try:
 					clone = self.service.files().copy(
@@ -114,49 +120,44 @@ class DriveClient(InformaCamDataClient):
 						body={'id':clone['id']}
 					).execute()
 					sleep(2)
+				except errors.HttpError as e:
+					print e
+					continue
 					
-					as_copied = {
-						'key' : drive['copied_flag'],
-						'value' : True,
-						'visibility' : 'PUBLIC'
-					}
-		 
-					tag = self.service.properties().insert(fileId=f['id'], body=as_copied).execute()
-					print tag
-		
+				try:
+					print self.service.files().delete(
+						fileId=f['id']
+					).execute()
+					sleep(2)
 				except errors.HttpError as e:
 					print e
 					continue
 
 		files = self.service.children().list(folderId=drive['asset_root']).execute()
-		for f in files['items']:	
-			if omit_absorbed and self.isAbsorbed(f['id']):
+		for f in files['items']:
+			# google is 5 hours ahead of Eastern btw
+			time_delta = datetime.timedelta(hours=-5)
+			
+			date_str = " ".join(f['createdDate'].split("T")).split(".")[0]
+			created_date = datetime.datetime(*strptime(date_str, "%Y-%m-%d %H:%M:%S")[:6])
+			created_date = created_date + time_delta
+			
+			new_time = mktime(created_date.timetuple())
+			
+			if omit_absorbed and self.isAbsorbed(new_time):
 				continue
 				
 			assets.append(f['id'])
+		
+		f = open(drive['absorbed_log'], 'wb+')
+		f.write(str(new_time))
+		f.close()
+		
 		return assets
 		
-	def isAbsorbed(self, file):		
-		if type(file) is str or type(file) is unicode:
-			return self.isAbsorbed(self.getFile(file))
-			
-		super(DriveClient, self).isAbsorbed(file)
-		
-		try:
-			p = self.service.properties().get(
-				fileId = file['id'],
-				propertyKey = drive['absorbed_flag'],
-				visibility = 'PUBLIC'
-			).execute()
-			
-			if p['value'] == "true":
-				return True
-				
-		except errors.HttpError, e:
-			pass
-		except TypeError, e:
-			print e
-			pass
+	def isAbsorbed(self, date_created):		
+		if date_created < self.absorbedByInformaCam:
+			return True
 			
 		return False
 		

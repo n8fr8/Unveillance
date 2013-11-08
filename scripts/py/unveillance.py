@@ -79,9 +79,17 @@ def initFiles():
 		except KeyError as e:
 			pass
 	
+	subprocess.Popen(["touch", import_directory['absorbed_log']])
+	
 	from conf import globaleaks
 	subprocess.Popen(["touch", globaleaks['absorbed_log']])
-	subprocess.Popen(["touch", import_directory['absorbed_log']])
+	
+	f = open(globaleaks['absorbed_log'], 'w+')
+	f.write(str(1381017600))
+	f.close()
+	
+	from conf import drive
+	subprocess.Popen(["touch", drive['absorbed_log']])
 	
 	from conf import j3m
 	subprocess.Popen(["chmod", "+x", "%sj3mparser/j3mparser.out" % j3m['root']])

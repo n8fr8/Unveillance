@@ -39,7 +39,8 @@ drive = {
 	"p12" : "%sGOOGLE_DRIVE-privatekey.p12" % conf,
 	"asset_root" : "GOOGLE DRIVE ID OF FOLDER WHERE YOUR SUBMISSIONS ARE HELD",
 	"absorbed_flag" : "absorbedByInformaCam",
-	"asset_id" : "google service account email"
+	"asset_id" : "google service account email",
+	"absorbed_log" : "%sabsorbedByInformaCam_gd.tx" % assets_root,
 }
 
 globaleaks = {
@@ -48,7 +49,7 @@ globaleaks = {
 	"user" : "user",
 	"context_gus" : "GL CONTEXT GUS",
 	"identity_file" : "%sgltest1.pem" % conf,
-	"absorbed_log" : "%sabsorbedByInformaCam_gl.json" % assets_root,
+	"absorbed_log" : "%sabsorbedByInformaCam_gl.txt" % assets_root,
 	"absorbed_flag" : "absorbedByInformaCam",
 	"public_url" : "http://WHATEVER_PUBLIC_URL.onion"
 }

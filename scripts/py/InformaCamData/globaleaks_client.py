@@ -169,7 +169,7 @@ class GlobaleaksClient(InformaCamDataClient):
 				if re.match(r'^gpg_encrypted-.*', line[-1]):
 					continue
 				
-				date_str = " ".join(line[-4:-2])
+				date_str = " ".join(line[-4:-2]).split(".")[0]
 				date_admitted = time.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 				
 				if omit_absorbed and self.isAbsorbed(time.mktime(date_admitted)):
