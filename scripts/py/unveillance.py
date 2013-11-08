@@ -151,7 +151,8 @@ def startIntake():
 		if intake_status == 0:
 			if time_since_last_fired > 0.0 and fabs(time_since_last_fired - time()) >= 1:
 				intake_status = 1
-				watch(only_imports=True)
+				watch(only_imports=True, only_sources=True)
+				watch(only_imports=True, only_submissions=True)
 				intake_status = 0
 				time_since_last_fired = 0.0
 			else:
@@ -274,10 +275,6 @@ if __name__ == "__main__":
 		print "Processing files..."
 		initFiles()
 		sleep(2)
-	
-	print "Processing new keys..."
-	watch(only_sources=True)
-	print "done.\n"
 	
 	print "Starting intake daemon..."
 	p = Process(target=startIntake)
