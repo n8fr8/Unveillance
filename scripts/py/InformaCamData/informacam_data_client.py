@@ -133,7 +133,7 @@ class InformaCamDataClient():
 		
 		self.absorbedByInformaCam['mode'] = self.last_update_for_mode
 
-		f.open(log_path, 'wb+')
+		f = open(log_path, 'wb+')
 		f.write(json.dumps(self.absorbedByInformaCam))
 		f.close()
 
