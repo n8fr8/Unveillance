@@ -4,9 +4,20 @@ from conf import file_salt, scripts_home, mime_types, mime_type_map
 __metaclass__ = type
 
 class InformaCamDataClient():
-	def __init__(self):
+	def __init__(self, log_path, mode="submissions"):
 		self.mime_types = copy.deepcopy(mime_types)
 		self.mime_type_map = copy.deepcopy(mime_type_map)
+
+		try:
+			f = open(log_path, 'rb')
+			self.absorbedByInformaCam = json.loads(f.read())
+			f.close()
+		except IOError as e:
+			self.absorbedByInformaCam = {'sources': 0, 'submissions': 0}
+
+		self.mode = mode
+		self.last_update_for_mode = 0
+
 		
 	def loadConf(self, path):
 		"""Loads any credentials for the repository.
@@ -115,3 +126,15 @@ class InformaCamDataClient():
 		m.update(repr(time.time()))
 		
 		return m.hexdigest()
+
+	def updateLog(self, log_path):
+		"""Updates our log with the time of the last pull"""
+		print "updating logs..."
+		
+		self.absorbedByInformaCam['mode'] = self.last_update_for_mode
+
+		f.open(log_path, 'wb+')
+		f.write(json.dumps(self.absorbedByInformaCam))
+		f.close()
+
+		print self.absorbedByInformaCam

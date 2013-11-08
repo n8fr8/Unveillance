@@ -7,16 +7,10 @@ sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
 from funcs import ShellThreader
 
 class ImportClient(InformaCamDataClient):
-	def __init__(self):
-		super(ImportClient, self).__init__()
+	def __init__(self, mode=None):
+		super(ImportClient, self).__init__(import_directory['absorbed_log'], mode=mode)
 
 		os.chdir(import_directory['asset_root'])
-		try:
-			f = open(import_directory['absorbed_log'], 'rb')
-			self.absorbedByInformaCam = int(f.read().strip())
-			f.close()
-		except:
-			self.absorbedByInformaCam = 0
 		
 	def getAssetMimeType(self, fileId):
 		super(ImportClient, self).getAssetMimeType(fileId)
@@ -91,16 +85,13 @@ class ImportClient(InformaCamDataClient):
 			for file in files:
 				s = os.stat(os.path.join(os.getcwd(), file))
 				print type(new_time)
-				new_time = s.st_ctime
+				if s.st_ctime > self.last_update_for_mode:
+					self.last_update_for_mode = s.st_ctime
 				
 				if omit_absorbed and self.isAbsorbed(os.path.join(os.getcwd(), file)):
 					continue
 				
 				assets.append(file)
-		
-		f = open(import_directory['absorbed_log'], 'wb+')
-		f.write(str(new_time))
-		f.close()
 		
 		return assets
 	
@@ -118,7 +109,7 @@ class ImportClient(InformaCamDataClient):
 		super(ImportClient, self).isAbsorbed(file)
 		
 		s = os.stat(file)
-		if s.st_ctime < self.absorbedByInformaCam:
+		if s.st_ctime < self.absorbedByInformaCam['mode']:
 			return True
 		
 		return False

@@ -151,7 +151,8 @@ def startIntake():
 			else:
 				if fabs(time_since_last_update - time()) >= (sync_sleep * 60):
 					intake_status = 1
-					watch()
+					watch(only_sources=True)
+					watch(only_submissions=True)
 					intake_status = 0
 					time_since_last_update = time()
 
@@ -197,7 +198,6 @@ if __name__ == "__main__":
 				pass
 				
 			try:
-				print "WRITING FALSE TO %s" % vals['status']
 				f = open(vals['status'], 'wb+')
 				f.write("False")
 				f.close()
@@ -284,4 +284,3 @@ if __name__ == "__main__":
 	print "done.\n"
 	
 	print "Welcome to Unveillance.\n\n"
-	

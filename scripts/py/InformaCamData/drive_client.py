@@ -15,8 +15,8 @@ scopes = [
 ]
 
 class DriveClient(InformaCamDataClient):
-	def __init__(self):
-		super(DriveClient, self).__init__()
+	def __init__(self, mode=None):
+		super(DriveClient, self).__init__(drive['absorbed_log'], mode=mode)
 		
 		f = file(drive['p12'], 'rb')
 		key = f.read()
@@ -36,13 +36,6 @@ class DriveClient(InformaCamDataClient):
 		
 		self.mime_types['folder'] = "application/vnd.google-apps.folder"
 		self.mime_types['file'] = "application/vnd.google-apps.file"
-		
-		try:
-			f = open(drive['absorbed_log'], 'rb')
-			self.absorbedByInformaCam = int(f.read().strip())
-			f.close()
-		except:
-			self.absorbedByInformaCam = 0
 		
 	def getAssetMimeType(self, fileId):
 		super(DriveClient, self).getAssetMimeType(fileId)
@@ -143,20 +136,18 @@ class DriveClient(InformaCamDataClient):
 			created_date = created_date + time_delta
 			
 			new_time = mktime(created_date.timetuple())
+			if new_time > self.last_update_for_mode:
+				self.last_update_for_mode = new_time
 			
 			if omit_absorbed and self.isAbsorbed(new_time):
 				continue
 				
 			assets.append(f['id'])
 		
-		f = open(drive['absorbed_log'], 'wb+')
-		f.write(str(new_time))
-		f.close()
-		
 		return assets
 		
 	def isAbsorbed(self, date_created):		
-		if date_created < self.absorbedByInformaCam:
+		if date_created < self.absorbedByInformaCam['mode']:
 			return True
 			
 		return False

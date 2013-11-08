@@ -7,18 +7,24 @@ from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
 from conf import sync, sync_sleep, assets_root, j3m, scripts_home
 
-def watch(only_sources=False, only_imports=False):
+def watch(only_sources=False, only_submissions=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.
 	
 	"""
 	print "running watch..."
 	clients = []
+	mode = None
+	
+	if only_submissions:
+		mode = "submissions"
+	elif only_sources:
+		mode = "sources"
 	
 	for sync_type in sync:
 		if sync_type == "drive":
 			if not only_imports:
 				from InformaCamData.drive_client import DriveClient	
-				clients.append(DriveClient())
+				clients.append(DriveClient(mode))
 		elif sync_type == "globaleaks":
 			if not only_imports:
 				from InformaCamData.globaleaks_client import GlobaleaksClient
@@ -43,6 +49,9 @@ def watch(only_sources=False, only_imports=False):
 			print data['file_name']
 			
 			if mime_type == client.mime_types['zip']:
+				if only_submissions:
+					continue
+					
 				del data['mime_type']
 				print "it is a source"
 				

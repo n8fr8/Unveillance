@@ -8,16 +8,10 @@ sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
 from funcs import ShellReader, ShellThreader
 
 class GlobaleaksClient(InformaCamDataClient):
-	def __init__(self):
-		super(GlobaleaksClient, self).__init__()
+	def __init__(self, mode=None):
+		super(GlobaleaksClient, self).__init__(globaleaks['absorbed_log'], mode=mode)
 		
 		os.chdir("%sInformaCamData" % scripts_home['python'])
-		try:
-			f = open(globaleaks['absorbed_log'], 'rb')			
-			self.absorbedByInformaCam = int(f.read().strip())
-			f.close()
-		except:
-			self.absorbedByInformaCam = 0
 	
 	def sshToHost(self, function, extras=None):
 		args = [
@@ -168,22 +162,19 @@ class GlobaleaksClient(InformaCamDataClient):
 				
 				date_str = " ".join(line[-4:-2]).split(".")[0]
 
-				date_admitted = time.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-				
-				if omit_absorbed and self.isAbsorbed(time.mktime(date_admitted)):
+				date_admitted = time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S"))
+				if date_admitted > self.last_update_for_mode:
+					self.last_update_for_mode = date_admitted
+
+				if omit_absorbed and self.isAbsorbed(date_admitted):
 					continue
 				
 				assets.append(line[-1])
-
-		self.absorbedByInformaCam = time.time()
-		f = open(globaleaks['absorbed_log'], 'wb+')
-		f.write(str(self.absorbedByInformaCam))
-		f.close()
 		
 		return assets
 		
 	def isAbsorbed(self, date_admitted):
-		if date_admitted < self.absorbedByInformaCam:
+		if date_admitted < self.absorbedByInformaCam[self.mode]:
 		 	return True
 		
 		return False
