@@ -21,7 +21,7 @@ class Submission(Asset):
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Submission, self).makeDir(os.path.join("%submissions" % asset_root, self._id))
+			super(Submission, self).makeDir(os.path.join("%submissions" % assets_root, self._id))
 		
 		if package_content is not None:
 			if self.addFile(self.file_name, package_content) and self.importAssets(self.file_name):
