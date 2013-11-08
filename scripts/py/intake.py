@@ -109,4 +109,5 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 		client.updateLog()
 
 if __name__ == "__main__":
-	watch()
+	watch(only_sources=True)
+	watch(only_submissions=True)
