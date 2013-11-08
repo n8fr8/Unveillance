@@ -101,6 +101,7 @@ def startElasticsearch():
 	data = p.stdout.readline()
 
 	while data:
+		print data
 		if re.match(r'.*started$', data):
 			print "STARTED: %s" % data
 			f = open(files['elasticsearch']['status'], 'wb+')
@@ -129,7 +130,7 @@ def watchHandler(sigint, frame):
 	
 
 def startIntake():
-	daemonize(files['daemon']['log'],files['daemon']['pid'])
+	#daemonize(files['daemon']['log'],files['daemon']['pid'])
 	
 	signal.signal(signal.SIGIO, watchHandler)
 	f = os.open(import_directory['asset_root'], os.O_RDONLY)
@@ -175,7 +176,12 @@ if __name__ == "__main__":
 		
 		for file, vals in files.iteritems():
 			f = open(vals['pid'], 'r')
-			current_pid = int(f.read().strip())
+			try:
+				current_pid = int(f.read().strip())
+			except ValueError as e:
+				print "No pid for %s" % file
+				continue
+
 			f.close()
 			
 			print "shutting down %s..." % file
@@ -191,10 +197,12 @@ if __name__ == "__main__":
 				pass
 				
 			try:
+				print "WRITING FALSE TO %s" % vals['status']
 				f = open(vals['status'], 'wb+')
 				f.write("False")
 				f.close()
 			except KeyError as e:
+				print e
 				pass
 			
 			print "done.\n"
@@ -235,7 +243,8 @@ if __name__ == "__main__":
 	while not elasticsearch_started:
 		try:
 			f = open(files['elasticsearch']['status'], 'rb')
-			elasticsearch_started = bool(f.read().strip())
+			if f.read().strip() == "True":
+				elasticsearch_started = True
 			f.close()
 		except IOError as e:
 			pass

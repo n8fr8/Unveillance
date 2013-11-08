@@ -41,14 +41,6 @@ class GlobaleaksClient(InformaCamDataClient):
 		return ssh_thread
 	
 	def getAssetMimeType(self, fileId):
-		if fileId.find("gpg_encrypted-") >= 0:
-			# delete file locally
-			return None
-			
-		fileId = fileId.replace(" ", "")
-		if fileId == "":
-			return None
-			
 		super(GlobaleaksClient, self).getAssetMimeType(fileId)
 		
 		self.sshToHost('pullFile', extras=[
@@ -162,6 +154,11 @@ class GlobaleaksClient(InformaCamDataClient):
 			if l_match is not None:
 				line = line.replace(sentinel, '').split(" ")
 				line[:] = [word for word in line if word != '']
+				if len(line) == 0:
+					continue
+
+				if line[0] == "total":
+					continue
 				
 				if line[-1] == "." or line[-1] == "..":
 					continue
@@ -170,22 +167,23 @@ class GlobaleaksClient(InformaCamDataClient):
 					continue
 				
 				date_str = " ".join(line[-4:-2]).split(".")[0]
+
 				date_admitted = time.strptime(date_str, "%Y-%m-%d %H:%M:%S")
 				
 				if omit_absorbed and self.isAbsorbed(time.mktime(date_admitted)):
 					continue
-						
-				assets.append(file)
+				
+				assets.append(line[-1])
 
 		self.absorbedByInformaCam = time.time()
 		f = open(globaleaks['absorbed_log'], 'wb+')
-		f.write(self.absorbedByInformaCam)
+		f.write(str(self.absorbedByInformaCam))
 		f.close()
 		
 		return assets
 		
 	def isAbsorbed(self, date_admitted):
-		if date_admitted < self.absorbedByInformaCam
+		if date_admitted < self.absorbedByInformaCam:
 		 	return True
 		
 		return False

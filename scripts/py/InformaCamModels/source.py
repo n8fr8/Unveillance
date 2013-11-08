@@ -65,7 +65,7 @@ class Source(Asset):
 		return True
 	
 	def importKey(self, path_to_key):
-		gpg = gnupg.GPG(gnupghome=gnupg_home)
+		gpg = gnupg.GPG(homedir=gnupg_home)
 		
 		key = open(path_to_key)
 		import_result = gpg.import_keys(key.read())
