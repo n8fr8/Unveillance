@@ -161,28 +161,6 @@ class DriveClient(InformaCamDataClient):
 			
 		return False
 		
-	def isCopied(self, file):
-		if type(file) is str or type(file) is unicode:
-			return self.isCopied(self.getFile(file))
-		
-		try:
-			p = self.service.properties().get(
-				fileId = file['id'],
-				propertyKey = drive['copied_flag'],
-				visibility = 'PUBLIC'
-			).execute()
-			
-			if p['value'] == "true":
-				return True
-		
-		except errors.HttpError, e:
-			pass
-		except TypeError, e:
-			print e
-			pass
-
-		return False
-		
 	def absorb(self, file):
 		if type(file) is str or type(file) is unicode:
 			return self.absorb(self.getFile(file))
