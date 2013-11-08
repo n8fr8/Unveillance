@@ -12,7 +12,7 @@ class InformaCamDataClient():
 			f = open(log_path, 'rb')
 			self.absorbedByInformaCam = json.loads(f.read())
 			f.close()
-		except IOError as e:
+		except:
 			self.absorbedByInformaCam = {'sources': 0, 'submissions': 0}
 
 		self.mode = mode

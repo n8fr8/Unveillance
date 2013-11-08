@@ -11,27 +11,28 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.
 	
 	"""
-	print "running watch..."
 	clients = []
 	mode = None
-	
+
 	if only_submissions:
 		mode = "submissions"
 	elif only_sources:
 		mode = "sources"
+
+	print "running watch... (mode=%s)" % mode
 	
 	for sync_type in sync:
 		if sync_type == "drive":
 			if not only_imports:
 				from InformaCamData.drive_client import DriveClient	
-				clients.append(DriveClient(mode))
+				clients.append(DriveClient(mode=mode))
 		elif sync_type == "globaleaks":
 			if not only_imports:
 				from InformaCamData.globaleaks_client import GlobaleaksClient
-				clients.append(GlobaleaksClient())
+				clients.append(GlobaleaksClient(mode=mode))
 		elif sync_type == "import":
 			from InformaCamData.import_client import ImportClient
-			clients.append(ImportClient())
+			clients.append(ImportClient(mode=mode))
 	
 	for client in clients:
 		for asset in client.listAssets(omit_absorbed=True):		

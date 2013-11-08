@@ -174,6 +174,7 @@ class GlobaleaksClient(InformaCamDataClient):
 		return assets
 		
 	def isAbsorbed(self, date_admitted):
+		print "%d < %d ?" % (date_admitted, self.absorbedByInformaCam[self.mode])
 		if date_admitted < self.absorbedByInformaCam[self.mode]:
 		 	return True
 		

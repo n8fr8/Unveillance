@@ -84,8 +84,14 @@ def initFiles():
 	from conf import globaleaks
 	subprocess.Popen(["touch", globaleaks['absorbed_log']])
 	
+	import json
+	start_gl_from = {
+		"sources" : 1381017600,
+		"submissions" : 1381017600
+	}
+
 	f = open(globaleaks['absorbed_log'], 'w+')
-	f.write(str(1381017600))
+	f.write(json.dumps(start_gl_from))
 	f.close()
 	
 	from conf import drive
