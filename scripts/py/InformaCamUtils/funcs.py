@@ -50,6 +50,15 @@ def gzipAsset(path_to_file):
 	
 	return _out.getvalue()
 
+def unGzipAsset(path_to_file):
+	_in = open(path_to_file, 'rb')
+	content = _in.read()
+	_in.close()
+
+	return gzip.GzipFile(fileobj=cStringIO.StringIO(content)).read()
+
+
+
 def callExternalApi(url, data=None, post=False, cookiejar=None, send_cookie=None):	
 	buf = cStringIO.StringIO()
 	d = []
