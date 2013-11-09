@@ -14,7 +14,7 @@ class Submission(Asset):
 			package_content = inflate['package_content']
 			del inflate['package_content']
 				
-		super(Submission, self).__init__(inflate=inflate, _id=_id, river="submissions", extra_omits=['j3m'], extra_fields=['j3m_id','mime_type'])
+		super(Submission, self).__init__(inflate=inflate, _id=_id, river="submissions", extra_omits=['j3m'], extra_fields=['mime_type'])
 	
 		if hasattr(self, 'asset_path'):
 			pass

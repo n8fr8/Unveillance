@@ -209,7 +209,6 @@ if __name__ == "__main__":
 				f.write("False")
 				f.close()
 			except KeyError as e:
-				print e
 				pass
 			
 			print "done.\n"
