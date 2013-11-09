@@ -1,8 +1,8 @@
+import gnupg, json, os, re
+
 from asset import Asset
 from conf import gnupg_home, assets_root, invalidate
 from InformaCamUtils.funcs import ShellReader
-
-import gnupg, json, os, re
 
 class Source(Asset):
 	def __init__(self, inflate=None, _id=None):
@@ -15,9 +15,6 @@ class Source(Asset):
 			del inflate['package_content']
 				
 		super(Source, self).__init__(inflate=inflate, _id=_id, river="sources", extra_fields=['fingerprint', 'baseImage'])
-		
-		if hasattr(self, "invalid"):
-			return
 		
 		if hasattr(self, 'asset_path'):
 			pass

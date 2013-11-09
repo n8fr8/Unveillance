@@ -1,9 +1,5 @@
 import time, base64, copy, sys, os
 
-from InformaCamUtils.elasticsearch import Elasticsearch
-from InformaCamUtils.funcs import ShellReader, AsTrueValue
-from conf import invalidate, scripts_home, public_user
-
 __metaclass__ = type
 
 emit_omits = ['emit_omits','es','_id', 'locked_fields']
@@ -11,6 +7,9 @@ locked_fields = ['asset_path', 'file_name', 'date_admitted', 'sync_source']
 
 class Asset():
 	def __init__(self, inflate=None, _id=None, extra_omits=None, extra_fields=None, river=None):
+		from conf import invalidate, scripts_home, public_user
+		from InformaCamUtils.elasticsearch import Elasticsearch
+
 		self.es = Elasticsearch(river=river)
 		
 		self.emit_omits = copy.deepcopy(emit_omits)
@@ -36,6 +35,7 @@ class Asset():
 						"error_code" : invalidate['codes']['unindexible'],
 						"reason" : invalidate['reasons']['unindexible']
 					}
+					print "SHIT:\n %s" % self.invalid
 			except KeyError as e:
 				print e
 				return
@@ -52,6 +52,9 @@ class Asset():
 				}
 					
 	def makeDir(self, path):
+		from InformaCamUtils.funcs import ShellReader, AsTrueValue
+		from conf import public_user
+
 		ShellReader(["mkdir", path])
 		
 		self.asset_path = path

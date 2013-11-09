@@ -4,10 +4,7 @@ from asset import Asset
 from conf import assets_root
 
 class J3M(Asset):
-	def __init__(self, path_to_j3m=None, _id=None):
-		invalid = None
-		file_name = None
-		
+	def __init__(self, path_to_j3m=None, _id=None, inflate=None):		
 		if _id is None and path_to_j3m is not None:
 			j = open(path_to_j3m, 'rb')
 			try:
@@ -19,6 +16,9 @@ class J3M(Asset):
 				return
 
 			inflate = self.massageData(data)
+			inflate['_id'] = self.generateId(data)
+			if inflate['_id'] is None:
+				return
 		
 		super(J3M, self).__init__(inflate=inflate, _id=_id, river="j3m")
 
@@ -26,6 +26,14 @@ class J3M(Asset):
 			self.asset_path = os.path.dirname(os.path.realpath(path_to_j3m))
 			self.file_name = os.path.basename(path_to_j3m)
 			self.save()
+
+	def generateId(self, data):
+		try:
+			return hashlib.md5(json.dumps(data)).hexdigest()
+		except:
+			print "ERROR MAKING ID HASH"
+
+		return None
 		
 	def massageData(self, data):
 		try:

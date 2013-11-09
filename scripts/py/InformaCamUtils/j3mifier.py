@@ -2,9 +2,10 @@ import os, base64, gzip, magic, json, gnupg, subprocess, re, sys
 from multiprocessing import Process
 
 from conf import gnupg_home, mime_types, j3m as j3m_root
-#from conf import gnupg_passphrase
+from conf import gnupg_passphrase
 from funcs import ShellThreader, unGzipAsset
-from InformaCamModels.submission import Submission, J3M
+from InformaCamModels.submission import Submission
+from InformaCamModels.j3m import J3M
 
 
 resolutions = [
@@ -16,7 +17,7 @@ class J3Mifier():
 	def __init__(self, submission):
 		print "j3mifying %s" % submission.asset_path
 
-		self.input = os.join.path(submission.asset_path, submission.file_name)
+		self.input = os.path.join(submission.asset_path, submission.file_name)
 		self.output = submission.asset_path
 		self.file_name = submission.file_name
 		
@@ -130,8 +131,6 @@ class J3Mifier():
 				return False
 
 			if file_type == mime_types['pgp']:
-				gnupg_passphrase = "/home/unveillance/Unveillance/conf/gpgpwd"
-
 				pwd = open(gnupg_passphrase, 'rb')
 				passphrase = pwd.read().strip()
 				pwd.close()

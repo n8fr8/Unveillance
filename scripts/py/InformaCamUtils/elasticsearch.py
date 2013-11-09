@@ -2,7 +2,6 @@ import requests, copy, json, sys, os
 
 class Elasticsearch():
 	def __init__(self, river=None):
-		sys.path.insert(0, os.path.abspath('.'))
 		from InformaCamModels.asset import Asset
 		
 		self.el = "http://localhost:9200/unveillance/"

@@ -1,7 +1,8 @@
+import os, sys
+
 from asset import Asset
 from j3m import J3M
 from conf import assets_root, j3m, scripts_home, invalidate
-import os, sys
 
 class Submission(Asset):
 	def __init__(self, inflate=None, _id=None):
@@ -14,10 +15,7 @@ class Submission(Asset):
 			del inflate['package_content']
 				
 		super(Submission, self).__init__(inflate=inflate, _id=_id, river="submissions", extra_omits=['j3m'], extra_fields=['j3m_id','mime_type'])
-		
-		if hasattr(self, "invalid"):
-			return
-		
+	
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
