@@ -52,6 +52,12 @@ Authentication:
 - A gpg password file is required to use your secret key.  You may place this wherever you want.
 - Your public key (which is shared to any user) can be placed wherever you want.
 
+For all these files:
+
+	chmod 0400 [file]
+
+to protect them.
+
 Forms:
 
 We support OpenJDK/JavaRosa forms.  For more information on how to generate them, please visit http://www.kobotoolbox.org/
@@ -60,7 +66,10 @@ Subsequent versions of this package will include a form generator, but for now, 
 #USAGE
 
 To install (no need to run after install-- it already does):
-
+		
+		cd /conf/
+		ln -s conf.py ../../scripts/py/
+		
         cd /scripts/py
         sudo unveillance.py install
 
