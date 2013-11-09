@@ -1,10 +1,10 @@
 import os, base64, gzip, magic, json, gnupg, subprocess, re, sys
 from multiprocessing import Process
 
-from conf import gnupg_home, mime_types
+from conf import gnupg_home, mime_types, j3m as j3m_root
 #from conf import gnupg_passphrase
 from funcs import ShellThreader, unGzipAsset
-from InformaCamModels.submission import Submission
+from InformaCamModels.submission import Submission, J3M
 
 
 resolutions = [
@@ -14,7 +14,6 @@ resolutions = [
 
 class J3Mifier():
 	def __init__(self, submission):
-		'''
 		print "j3mifying %s" % submission.asset_path
 
 		self.input = os.join.path(submission.asset_path, submission.file_name)
@@ -24,50 +23,62 @@ class J3Mifier():
 		mime_type = submission.mime_type
 		
 		self.submission = submission
-		'''
-		
-		print "j3mifying %s" % submission['asset_path']
 
-		self.input = os.path.join(submission['asset_path'], submission['file_name'])
-		self.output = submission['asset_path']
-		self.file_name = submission['file_name']
-		
-		mime_type = submission['mime_type']
-		
-		self.submission = submission
 		ok = False
 		if mime_type == mime_types['image']:
 			ok = self.getImageMetadata()
 		elif mime_type == mime_types['video']:
 			ok = self.getVideoMetadata()
 		elif mime_type == mime_types['j3m']:
-			os.rename(self.input, "%s.txt" % self.input[:-4])
-			self.input = "%s.txt" % self.input[:-4]
+			os.rename(self.input, "%s.txt.b64" % self.input[:-4])
+			self.input = "%s.txt.b64" % self.input[:-4]
 			ok = self.getJ3MMetadata()
 		
 		if ok:
-			self.submission['j3m_verified'] = self.verifySignature()
-			self.submission['media_verified'] = self.verifyVisualContent()
+			self.submission.j3m_verified = self.verifySignature()
+			self.submission.media_verified = self.verifyVisualContent()
+
+		self.submission.save()
 		
-		'''
 		self.evaluateCameraFingerprint(submission._id)
 		self.evaluateUsageFingerprint(submission._id)
-		'''
 	
 	def getImageMetadata(self):
 		"""
 			returns the j3m embedded in a .jpg
 		"""
 		print "getting image metadata"
-		# run j3mparser.out
-		
-		# dump result into a file called [fname].j3m.orig
-		
-		p = Process(target=self.makeDerivativeImages)
-		p.start()
-		
-		# json read that file and return object
-		
+		# run j3mparser.out to [fname].txt
+		j3mparser_cmd = [
+			"%sj3mparser/j3mparser.out" % j3m_root['root'],
+			self.input
+		]
+		print j3mparser_cmd
+		p = subprocess.Popen(j3mparser_cmd, stdout=file("%s.txt" % self.input[:-4], "a+"))
+		p.wait()
+
+		f = open("%s.txt" % self.input[:-4], 'rb')
+		txt = open("%s.txt.b64" % self.input[:-4], 'a+')
+		for line in f:
+			if re.match(r'^file: .*', line):
+				continue
+			if re.match(r'^Got obscura marker.*', line):
+				continue
+			if re.match(r'^Generic APPn ffe0 loaded.*', line):
+				continue
+			if re.match(r'^Component.*', line):
+				continue
+			if re.match(r'^Didn\'t find .*', line):
+				continue
+			txt.write(line)
+		f.close()
+		txt.close()
+
+		if self.getJ3MMetadata():
+			p = Process(target=self.makeDerivativeImages)
+			p.start()
+			return True
+				
 		return False
 	
 	def getVideoMetadata(self):
@@ -76,7 +87,7 @@ class J3Mifier():
 		"""
 		print "getting video metadata"
 		
-		# run ffmpeg command to dump result into a file called [fname].txt
+		# run ffmpeg command to dump result into a file called [fname].txt.b64
 		ffmpeg_cmd = [
 			"ffmpeg", "-y", "-dump_attachment:t", 
 			"%s.txt.b64" % self.input[:-4], 
@@ -199,7 +210,8 @@ class J3Mifier():
 		f.write(extracted_j3m)
 		f.close()
 
-		# json read that [fname].j3m and return object
+		j3m_asset = J3M(path_to_j3m="%s.j3m" % self.input[:-4])
+		self.submission.j3m_id = j3m_asset._id
 		return True
 	
 	def makeDerivativeImages(self):
@@ -220,8 +232,10 @@ class J3Mifier():
 			ffmpeg_cmd = [
 				"ffmpeg", "-y", "-i", self.input,
 				"-filter:v", "scale=iw*%d:ih*%d" % (resolution[label][0], resolution[label][1]),
-				os.path.join(self, output, "%s%s" % (label, self.file_name))
+				os.path.join(self.output, "%s%s" % (label, self.file_name))
 			]
+
+			print ffmpeg_cmd
 			ffmpeg = ShellThreader(ffmpeg_cmd)
 			ffmpeg.start()
 			ffmpeg.join()
@@ -298,6 +312,7 @@ class J3Mifier():
 
 		supplied_fingerprint = str(json.loads(j3m_data)['genealogy']['createdOnDevice'])
 		if verified.fingerprint.upper() == supplied_fingerprint.upper():
+			print "Signature valid for %s" % verified.fingerprint.upper()
 			return True
 
 		return False
