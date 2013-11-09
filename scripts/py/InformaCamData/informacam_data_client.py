@@ -131,7 +131,7 @@ class InformaCamDataClient():
 		"""Updates our log with the time of the last pull"""
 		print "updating logs..."
 		
-		self.absorbedByInformaCam['mode'] = self.last_update_for_mode
+		self.absorbedByInformaCam[self.mode] = self.last_update_for_mode
 
 		f = open(log_path, 'wb+')
 		f.write(json.dumps(self.absorbedByInformaCam))

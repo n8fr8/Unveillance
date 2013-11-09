@@ -211,6 +211,7 @@ class J3Mifier():
 
 		j3m_asset = J3M(path_to_j3m="%s.j3m" % self.input[:-4])
 		self.submission.j3m_id = j3m_asset._id
+		self.submission.save()
 		return True
 	
 	def makeDerivativeImages(self):
