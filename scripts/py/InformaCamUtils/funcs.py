@@ -1,4 +1,4 @@
-import sys, subprocess, os, cStringIO, pycurl, re, json, math, operator
+import sys, subprocess, os, cStringIO, re, json, math, operator
 import gzip, threading, hashlib
 from conf import api
 from Crypto.Cipher import AES

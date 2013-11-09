@@ -39,46 +39,6 @@ class J3M(Asset):
 			except ValueError as e:
 				print e
 				return
-			
-			try:
-				signature = data_['signature']
-				del data_['signature']
-				
-				import gnupg
-				from conf import gnupg_home
-
-				d_clone = os.path.join("%s/tmp/" % assets_root, "%s.json" % inflate['file_name'])
-
-				data_clone = open(d_clone, 'wb+')
-				data_clone.write(json.dumps(data_))
-				data_clone.close()
-													
-				print signature
-				gpg = gnupg.GPG(homedir=gnupg_home)
-				verified = gpg.verify_file(StringIO(signature), d_clone)
-				
-				if verified.fingerprint is None:
-					from conf import invalidate
-					invalid = [
-						invalidate['codes']['j3m_not_verified'],
-						invalidate['reasons']['j3m_not_verified']
-					]
-					
-				os.remove(d_clone)
-			except KeyError as e:
-				print e
-				print "signature already parsed"
-				pass
-			
-			if invalid is not None:
-				print invalid
-			
-			try:
-				inflate = self.massageData(json.loads(data))
-				inflate['_id'] = hashlib.sha1(data).hexdigest()
-			except ValueError as e:
-				print e
-				return
 		
 		super(J3M, self).__init__(inflate=inflate, _id=_id, river="j3m")
 		

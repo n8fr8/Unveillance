@@ -40,21 +40,17 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 			if not mime_type in client.mime_types.itervalues():
 				continue
 			
-			data = {
-				'_id' : client.getFileNameHash(asset),
-				'file_name' : client.getFileName(asset),
-				'mime_type' : mime_type,
-				'package_content' : b64encode(client.pullFile(asset)).rstrip("="),
-				'sync_source' : sync_type
-			}
-			print data['file_name']
-			
 			if mime_type == client.mime_types['zip']:
 				if only_submissions:
 					continue
-					
-				del data['mime_type']
-				print "it is a source"
+				
+				data = {
+					'_id' : client.getFileNameHash(asset),
+					'file_name' : client.getFileName(asset),
+					'package_content' : b64encode(client.pullFile(asset)).rstrip("="),
+					'sync_source' : sync_type
+				}
+				print "%s is a source" % data['file_name']
 				
 				try:
 					source = Source(inflate=data)
@@ -66,33 +62,24 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 					print source.invalid
 					continue
 				
-			elif mime_type == client.mime_types['j3m']:
-				if only_sources:
-					continue
-					
-				del data['mime_type']
-				print "it is a j3m"
-				
-				try:			
-					j3m = J3M(inflate=data)
-				except exceptions.ConnectionError as e:
-					print e
-					sys.exit(0)
-					
-				if hasattr(j3m, "invalid"):
-					print source.invalid
-					continue
-				
 			else:
 				if only_sources:
 					continue
-
+				
+				data = {
+					'_id' : client.getFileNameHash(asset),
+					'file_name' : client.getFileName(asset),
+					'mime_type' : mime_type,
+					'package_content' : b64encode(client.pullFile(asset)).rstrip("="),
+					'sync_source' : sync_type
+				}
+				print "%s is a submission" % data['file_name']
+				
 				if data['file_name'][-4:] != ".%s" % client.mime_type_map[mime_type]:
 					data['file_name'] = "%s.%s" % (
 						data['file_name'], 
 						client.mime_type_map[mime_type]
 					)
-				print "it is a sub: %s" % data['file_name']
 				
 				try:
 					submission = Submission(inflate=data)
