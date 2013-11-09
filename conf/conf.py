@@ -12,14 +12,14 @@ scripts_home = {
 }
 elasticsearch_home = "/path/to/where/you/put/elasticsearch/"
 secret_key_path = '/path/to/your/secret/key/for/gnupg/key.asc'
+gnugp_passphrase = "/path/to/your/gpg/password"
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
 anon_iv = "16 bytes of goodness"	# 16
 
 j3m = {
-	"root" : "/path/to/where/you/have/packages/j3m/",
-	"classpath" : ".:%(j)sframework/:%(j)sjars/*:%(j)sconf/" % {'j' : '/path/to/where/you/have/packages/j3m/'}
+	"root" : "/path/to/where/you/have/packages/j3m/"
 }
 
 """
@@ -150,17 +150,21 @@ public = {
 }
 
 mime_types = {
-	'j3m': "text/plain",
-	'zip' : "application/zip",
-	'image' : "image/jpeg",
-	'video' : "video/x-matroska",
-	'wildcard' : "application/octet-stream"
+        'j3m': "text/plain",
+        'zip' : "application/zip",
+        'image' : "image/jpeg",
+        'video' : "video/x-matroska",
+        'wildcard' : "application/octet-stream",
+        'pgp' : "application/pgp",
+        'gzip' : "application/x-gzip"
 }
 
 mime_type_map = {
-	'text/plain': "json",
-	'application/zip': "zip",
-	'image/jpeg': "jpg",
-	'video/x-matroska': "mkv",
-	'application/octet-stream': 'wildcard'
+        'text/plain': "json",
+        'application/zip': "zip",
+        'image/jpeg': "jpg",
+        'video/x-matroska': "mkv",
+        'application/octet-stream': 'wildcard',
+        'application/pgp' : 'pgp',
+        'application/x-gzip' : 'gzip'
 }
