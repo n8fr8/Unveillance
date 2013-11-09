@@ -98,7 +98,7 @@ def initFiles():
 	subprocess.Popen(["touch", drive['absorbed_log']])
 	
 	from conf import j3m
-	subprocess.Popen(["chmod", "+x", "%sj3mparser/j3mparser.out" % j3m['root']])
+	subprocess.Popen(["chmod", "+x", "%sj3mparser.out" % j3m['root']])
 
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
