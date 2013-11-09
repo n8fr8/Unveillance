@@ -51,7 +51,7 @@ class J3Mifier():
 		print "getting image metadata"
 		# run j3mparser.out to [fname].txt
 		j3mparser_cmd = [
-			"%sj3mparser/j3mparser.out" % j3m_root['root'],
+			"%sj3mparser.out" % j3m_root['root'],
 			self.input
 		]
 		print j3mparser_cmd
