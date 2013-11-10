@@ -16,6 +16,7 @@ resolutions = [
 class J3Mifier():
 	def __init__(self, submission):
 		print "j3mifying %s" % submission.asset_path
+		gpg = gnupg.GPG(homedir=gnupg_home)
 
 		self.input = os.path.join(submission.asset_path, submission.file_name)
 		self.output = submission.asset_path
@@ -139,12 +140,10 @@ class J3Mifier():
 					"gpg", "--passphrase", passphrase,
 					"--output", "%s.j3m.gzip" % self.input[:-4], 
 					"--decrypt", "%s.txt.unb64" % self.input[:-4],
-
 				]
 
-				gpg = ShellThreader(gpg_cmd)
-				gpg.start()
-				gpg.join()
+				p = subprocess.Popen(gpg_cmd)
+				p.wait()
 
 				# check to see if this new output is a gzip
 				gpg_check = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
@@ -152,6 +151,7 @@ class J3Mifier():
 					file_type = gpg_check.id_filename("%s.j3m.gzip" % self.input[:-4])
 					print "NEW DOC TYPE: %s" % file_type
 				except:
+					print "FILE DOES NOT EXIST STILL"
 					gpg_check.close()
 					return False
 
@@ -166,7 +166,6 @@ class J3Mifier():
 		except:
 			m.close()
 			return False
-
 
 		# un gzip [fname].j3m.gzip and save as [fname].j3m.orig
 		j3m = open("%s.j3m.orig" % self.input[:-4], 'wb+')
@@ -299,8 +298,6 @@ class J3Mifier():
 	
 	def verifySignature(self):
 		print "verifying signature"
-		gpg = gnupg.GPG(homedir=gnupg_home)
-
 		verified = gpg.verify_file("%s.j3m" % self.input[:-4], sig_file="%s.j3m.sig" % self.input[:-4])
 
 		if verified.fingerprint is None:
