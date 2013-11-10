@@ -26,7 +26,7 @@ class J3M(Asset):
 			self.asset_path = os.path.dirname(os.path.realpath(path_to_j3m))
 			self.file_name = os.path.basename(path_to_j3m)
 			self.save()
-			print j3m._id
+			print self._id
 		else:
 			print "no path to j3m?"
 
