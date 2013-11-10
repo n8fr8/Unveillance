@@ -57,7 +57,7 @@ def daemonize(log_file, pid_file):
 	
 	si = file('/dev/null', 'r')
 	so = file(log_file, 'a+')
-	se = file('/dev/null', 'a+', 0)
+	se = file(log_file, 'a+', 0)
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
