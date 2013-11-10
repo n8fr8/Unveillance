@@ -5,7 +5,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from conf import scripts_home, public, invalidate, submissions_dump, api as api_prefs
+from conf import scripts_home, mime_types, public, invalidate, submissions_dump, api as api_prefs
 from InformaCamModels.source import Source as ICSource
 from InformaCamModels.submission import Submission as ICSubmission
 from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
@@ -200,21 +200,20 @@ class MediaHandler(tornado.web.RequestHandler):
 	
 	def get(self, _id, resolution):		
 		submission = ICSubmission(_id=_id)
-		if hasattr(submission, "invalid"):
-			res = Res()
-			res.reason = submission.invalid
-			self.write(res.emit())
+		path = "%s%s/%s_%s" % (
+			submissions_dump, 
+			_id, 
+			resolution, 
+			submission.file_name
+		)
+		
+		f = open(path, 'rb')
+		if resolution != "thumb":
+			self.set_header("Content-Type", submission.mime_type)
 		else:
-			path = "%s%s/%s_%s" % (
-				submissions_dump, 
-				_id, 
-				resolution, 
-				submission.file_name
-			)
-			
-			f = open(path, 'rb')
-			self.write(f.read())
-			f.close()
+			self.set_header("Content-Type", mime_types['image'])
+		self.finish(f.read())
+		f.close()
 		
 class J3MHandler(tornado.web.RequestHandler):
 	def initialize(self, _id):
@@ -222,22 +221,15 @@ class J3MHandler(tornado.web.RequestHandler):
 		
 	def get(self, _id):
 		submission = ICSubmission(_id=_id)
-
-		if hasattr(submission, "invalid"):
+		try:
+			self.finish(submission.j3m.emit())
+		except:
 			res = Res()
-			res.reason = submission.invalid
+			res.reason = {
+				'code' : invalidate['codes']['submission_invalid_j3m'],
+				'message' : invalidate['reasons']['submission_invalid_j3m']
+			}
 			self.write(res.emit())
-		else:
-			path = "%s%s/%s" % (
-				submissions_dump, 
-				_id, 
-				"%s.json" % submission.file_name[:-3]
-			)
-			
-			f = open(path, 'rb')
-			self.write(f.read())
-			f.close()	
-
 routes = [
 	(r"/", Ping),
 	(r"/submissions/", Submissions),

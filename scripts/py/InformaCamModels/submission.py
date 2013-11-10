@@ -25,6 +25,9 @@ class Submission(Asset):
 			if self.addFile(self.file_name, package_content):
 				self.importAssets(self.file_name)
 			
+		if self.j3m_id is not None:
+			self.j3m = J3M(_id=self.j3m_id)
+			
 	def setMimeType(self, mime_type):
 		self.mime_type = mime_type
 		self.save()
