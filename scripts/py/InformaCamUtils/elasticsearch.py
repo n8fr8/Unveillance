@@ -124,14 +124,16 @@ class Elasticsearch():
 		q = self.buildQuery(params)
 		if q is None:
 			return False
-		
+
+		print q
 		query = {
 			"query" : {
 				"filtered" : {
 					"query" : q['query'],
 					"filter" : q['filters']
 				}
-			}
+			},
+			"sort" : q['sort']
 		}
 		if len(q['filters'].keys()) == 0:
 			del query['query']['filtered']['filter']
@@ -153,6 +155,14 @@ class Elasticsearch():
 		return proc_res
 	
 	def buildQuery(self, params, as_sub_query=False):
+		sort = [
+			{
+				"date_admitted" : {
+					"order" : "desc"
+				}
+			}
+		]
+		
 		match_all = { "match_all" : {}}
 		path_1 = "data.sensorCapture"
 		path_2 = "%s.sensorPlayback" % path_1
@@ -194,6 +204,7 @@ class Elasticsearch():
 					try:
 						if clause['field'] == "get_all":
 							query['query'] = match_all
+							query['sort'] = sort
 							return query
 						elif clause['field'] == "location":
 							c = {
@@ -321,6 +332,7 @@ class Elasticsearch():
 		if len(clauses) == 0:
 			return None
 
+		query['sort'] = sort
 		if o is not None:
 			query['filters'][o] = []
 			query['query'] = match_all
@@ -341,7 +353,6 @@ class Elasticsearch():
 				query['filters'][o].append(clause)
 			else:
 				query['filters'][clause.keys()[0]] = clause[clause.keys()[0]]
-
-				
+		
 		return query
 		

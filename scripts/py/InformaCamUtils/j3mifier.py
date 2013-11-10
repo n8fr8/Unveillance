@@ -1,4 +1,4 @@
-import os, base64, gzip, magic, json, gnupg, subprocess, re, sys
+import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
 from conf import gnupg_home, mime_types, j3m as j3m_root
@@ -7,24 +7,23 @@ from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
 from InformaCamModels.j3m import J3M
 
-
 resolutions = [
 	{"low_" : [0.5,0.5]},
 	{"med_" : [0.75,0.75]}
 ]
 
-class J3Mifier():
+class J3Mifier(threading.Thread):
 	def __init__(self, submission):
-		print "j3mifying %s" % submission.asset_path
-
+		threading.Thread.__init__(self)
+		
 		self.input = os.path.join(submission.asset_path, submission.file_name)
 		self.output = submission.asset_path
 		self.file_name = submission.file_name
-		
-		mime_type = submission.mime_type
-		
 		self.submission = submission
-
+		
+	def run(self):
+		print "j3mifying %s" % self.submission.asset_path		
+		mime_type = self.submission.mime_type
 		ok = False
 		if mime_type == mime_types['image']:
 			ok = self.getImageMetadata()
@@ -238,7 +237,6 @@ class J3Mifier():
 			ffmpeg = ShellThreader(ffmpeg_cmd)
 			ffmpeg.start()
 			ffmpeg.join()
-
 	
 	def makeDerivativeVideos(self):
 		print "making derivative videos"

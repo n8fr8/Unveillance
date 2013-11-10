@@ -25,7 +25,7 @@ class Submission(Asset):
 			if self.addFile(self.file_name, package_content):
 				self.importAssets(self.file_name)
 			
-		if self.j3m_id is not None:
+		if hasattr(self, "j3m_id") and self.j3m_id is not None:
 			self.j3m = J3M(_id=self.j3m_id)
 			
 	def setMimeType(self, mime_type):
@@ -36,5 +36,8 @@ class Submission(Asset):
 		sys.path.insert(0, os.path.join(scripts_home['python'], "InformaCamUtils"))
 		from InformaCamUtils.j3mifier import J3Mifier
 
-		J3Mifier(self)
+		j3m_thread = J3Mifier(self)
+		j3m_thread.start()
+		j3m_thread.join()
+		
 		return True
