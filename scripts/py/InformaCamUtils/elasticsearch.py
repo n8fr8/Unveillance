@@ -33,7 +33,7 @@ class Elasticsearch():
 			return False
 	
 	def index(self, asset):
-		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit()))
+		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit(exclude=['_id'])))
 		res = json.loads(r.text)
 		
 		try:
@@ -42,7 +42,7 @@ class Elasticsearch():
 			return False
 			
 	def update(self, asset):
-		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit()))
+		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit(exclude=['_id'])))
 		res = json.loads(r.text)
 		
 		try:

@@ -2,7 +2,7 @@ import time, base64, copy, sys, os
 
 __metaclass__ = type
 
-emit_omits = ['emit_omits','es','_id', 'locked_fields']
+emit_omits = ['emit_omits','es', 'locked_fields']
 locked_fields = ['asset_path', 'file_name', 'date_admitted', 'sync_source']
 
 class Asset():
