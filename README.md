@@ -65,8 +65,8 @@ Subsequent versions of this package will include a form generator, but for now, 
 
 To install (no need to run after install-- it already does):
 		
-		cd /conf/
-		ln -s conf.py ../../scripts/py/
+		cd /scripts/py/
+		ln -s ../../conf.py .
 		
         cd /scripts/py
         sudo unveillance.py install
