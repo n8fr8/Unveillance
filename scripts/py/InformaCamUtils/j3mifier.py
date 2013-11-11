@@ -2,7 +2,7 @@ import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
 from conf import gnupg_home, mime_types, j3m as j3m_root
-from conf import gnupg_passphrase, scripts_home
+from conf import gnupg_pwd, scripts_home
 from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
 from InformaCamModels.j3m import J3M
@@ -146,7 +146,7 @@ class J3Mifier(threading.Thread):
 				return False
 
 			if file_type == mime_types['pgp']:
-				pwd = open(gnupg_passphrase, 'rb')
+				pwd = open(gnupg_pwd, 'rb')
 				passphrase = pwd.read().strip()
 				pwd.close()
 

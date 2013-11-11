@@ -275,6 +275,9 @@ if __name__ == "__main__":
 		print "Processing files..."
 		initFiles()
 		sleep(2)
+		
+		print "Getting Keys..."
+		watch(only_sources=True)
 	
 	print "Starting intake daemon..."
 	p = Process(target=startIntake)
