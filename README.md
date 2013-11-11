@@ -37,13 +37,11 @@ Install FFmpeg2theora (not included in packaging):
     
 Config:
 
-There are 3 config files that must be modified.  Those are located in:
+The config file must be modified.  It is located in:
 
     /conf/conf.py
-    /packages/j3m/conf/conf.properties
-    /packages/j3m/conf/ubuntu.properties
 
-They're pretty well documented, but there is no setup wizard yet.
+It's pretty well documented, but there is no setup wizard yet.
 Subsequent versions of this package will probably make that easier.
 
 Authentication:
