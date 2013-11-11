@@ -115,7 +115,23 @@ class J3Mifier(threading.Thread):
 		# un b64 [fname].txt.b64 and save as [fname].txt.unb64
 		b64 = open("%s.txt.b64" % self.input[:-4])
 		txt = open("%s.txt.unb64" % self.input[:-4], 'wb+')
-		txt.write(base64.b64decode(b64.read()))
+		
+		content = b64.read()
+		try:
+			txt.write(base64.b64decode(content))
+		except TypeError as e:
+			print e
+			print "...so trying to decode again (brute-force padding)"
+			try:
+				content += "=" * ((4 - len(content) % 4) % 4)
+				txt.write(base64.b64decode(content))
+			except TypeError as e:
+				print e
+				print "could not unB64 this file (%s.txt.b64)" % self.input[:-4]
+				txt.close()
+				b64.close()
+				return False
+				
 		txt.close()
 		b64.close()
 
