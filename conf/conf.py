@@ -12,7 +12,7 @@ scripts_home = {
 }
 elasticsearch_home = "/path/to/where/you/put/elasticsearch/"
 secret_key_path = '/path/to/your/secret/key/for/gnupg/key.asc'
-gnugp_passphrase = "/path/to/your/gpg/password"
+gnugp_pwd = "/path/to/your/gpg/password"
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
