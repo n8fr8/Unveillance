@@ -35,10 +35,12 @@ class Elasticsearch():
 	def index(self, asset):
 		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit(exclude=['_id'])))
 		res = json.loads(r.text)
+		print res
 		
 		try:
 			return res['ok']
-		except:
+		except KeyError as e:
+			print e
 			return False
 			
 	def update(self, asset):

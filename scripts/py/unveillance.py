@@ -69,7 +69,8 @@ def initElasticsearch():
 def initFiles():
 	subprocess.Popen(["mkdir","%ssources" % assets_root])
 	subprocess.Popen(["mkdir","%ssubmissions" % assets_root])		
-	subprocess.Popen(["mkdir","%stmp" % assets_root])	
+	subprocess.Popen(["mkdir","%stmp" % assets_root])
+	subprocess.Popen(["touch","%sreindex.txt" % assets_root])
 	
 	for file, vals in files.iteritems():
 		subprocess.Popen(["touch",vals['pid']])

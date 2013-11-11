@@ -35,6 +35,12 @@ class Asset():
 						"error_code" : invalidate['codes']['unindexible'],
 						"reason" : invalidate['reasons']['unindexible']
 					}
+					
+					from conf import assets_root
+					f = open("%reindex.txt" % assets_root, "a+")
+					f.write(self._id)
+					f.close()
+					
 					print "SHIT:\n %s" % self.invalid
 			except KeyError as e:
 				print e
