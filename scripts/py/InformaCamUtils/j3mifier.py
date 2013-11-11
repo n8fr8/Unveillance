@@ -40,8 +40,8 @@ class J3Mifier(threading.Thread):
 
 		self.submission.save()
 		
-		self.evaluateCameraFingerprint(submission._id)
-		self.evaluateUsageFingerprint(submission._id)
+		self.evaluateCameraFingerprint(self.submission._id)
+		self.evaluateUsageFingerprint(self.submission._id)
 	
 	def getImageMetadata(self):
 		"""
