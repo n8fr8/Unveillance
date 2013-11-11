@@ -9,8 +9,11 @@ from funcs import ShellThreader
 class ImportClient(InformaCamDataClient):
 	def __init__(self, mode=None):
 		super(ImportClient, self).__init__(import_directory['absorbed_log'], mode=mode)
-
-		os.chdir(import_directory['asset_root'])
+		try:
+			os.chdir(import_directory['asset_root'])
+		except OSError as e:
+			print e
+			self.usable = False
 		
 	def getAssetMimeType(self, fileId):
 		super(ImportClient, self).getAssetMimeType(fileId)

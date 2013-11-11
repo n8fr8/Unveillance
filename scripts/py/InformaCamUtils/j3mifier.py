@@ -223,13 +223,13 @@ class J3Mifier(threading.Thread):
 		hires.start()
 		hires.join()
 
-		resolutions.append({'thumb_' : [0.342, 0.342]})
+		resolutions.append({'thumb_' : [0.15, 0.15]})
 		for resolution in resolutions:
 			label = resolution.keys()[0]
 
 			ffmpeg_cmd = [
 				"ffmpeg", "-y", "-i", self.input,
-				"-filter:v", "scale=iw*%d:ih*%d" % (resolution[label][0], resolution[label][1]),
+				"-vf", "scale=iw*%d:ih*%d" % (resolution[label][0], resolution[label][1]),
 				os.path.join(self.output, "%s%s" % (label, self.file_name))
 			]
 

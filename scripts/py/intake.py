@@ -35,6 +35,9 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 			clients.append(ImportClient(mode=mode))
 	
 	for client in clients:
+		if not client.usable:
+			continue
+			
 		for asset in client.listAssets(omit_absorbed=True):		
 			mime_type = client.getAssetMimeType(asset)		
 			if not mime_type in client.mime_types.itervalues():

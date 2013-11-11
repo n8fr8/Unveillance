@@ -17,8 +17,8 @@ class InformaCamDataClient():
 
 		self.mode = mode
 		self.last_update_for_mode = 0
+		self.usable = True
 
-		
 	def loadConf(self, path):
 		"""Loads any credentials for the repository.
 		

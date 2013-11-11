@@ -27,7 +27,7 @@ class GenerateICTD(tornado.web.RequestHandler):
 		res.result = 200
 		res.data = ictd
 		
-		self.write(res.emit())
+		self.finish(res.emit())
 
 class Ping(tornado.web.RequestHandler):
 	def get(self):
@@ -76,7 +76,7 @@ class Submissions(tornado.web.RequestHandler):
 			res.data = q
 			res.result = 200
 
-		self.write(res.emit())
+		self.finish(res.emit())
 	
 class Submission(tornado.web.RequestHandler):
 	def initialize(self, _id):
@@ -94,7 +94,7 @@ class Submission(tornado.web.RequestHandler):
 			else:
 				res.reason = submission.invalid
 				
-		self.write(res.emit())
+		self.finish(res.emit())
 		
 	def post(self, _id):
 		res = Res()
@@ -111,7 +111,7 @@ class Submission(tornado.web.RequestHandler):
 					res.data = submission.emit()
 					res.result = 200
 			
-		self.write(res.emit())
+		self.finish(res.emit())
 		
 class Sources(tornado.web.RequestHandler):
 	def get(self):
@@ -155,7 +155,7 @@ class Sources(tornado.web.RequestHandler):
 			res.data = q
 			res.result = 200
 
-		self.write(res.emit())
+		self.finish(res.emit())
 	
 class Source(tornado.web.RequestHandler):
 	def initialize(self, _id):
@@ -174,7 +174,7 @@ class Source(tornado.web.RequestHandler):
 			else:
 				res.reason = source.invalid
 				
-		self.write(res.emit())
+		self.finish(res.emit())
 	
 	def post(self, _id):
 		res = Res()
@@ -191,7 +191,7 @@ class Source(tornado.web.RequestHandler):
 					res.data = source.emit()
 					res.result = 200
 			
-		self.write(res.emit())
+		self.finish(res.emit())
 
 class MediaHandler(tornado.web.RequestHandler):
 	def initialize(self, _id, resolution):
@@ -200,11 +200,17 @@ class MediaHandler(tornado.web.RequestHandler):
 	
 	def get(self, _id, resolution):		
 		submission = ICSubmission(_id=_id)
+		
+		if resolution == "thumb" and submission.mime_type == mime_types['video']:
+			as_file_name = "%s.jpg" % submission.file_name[:-4]
+		else:
+			as_file_name = submission.file_name
+			
 		path = "%s%s/%s_%s" % (
 			submissions_dump, 
 			_id, 
 			resolution, 
-			submission.file_name
+			as_file_name
 		)
 		
 		f = open(path, 'rb')
@@ -229,7 +235,8 @@ class J3MHandler(tornado.web.RequestHandler):
 				'code' : invalidate['codes']['submission_invalid_j3m'],
 				'message' : invalidate['reasons']['submission_invalid_j3m']
 			}
-			self.write(res.emit())
+			self.finish(res.emit())
+
 routes = [
 	(r"/", Ping),
 	(r"/submissions/", Submissions),
