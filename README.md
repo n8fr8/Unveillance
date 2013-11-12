@@ -12,6 +12,8 @@ Install dependencies (not included in packaging):
 
     sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools
     easy_install --upgrade google-api-python-client
+    sudo pip install oauth2client
+    sudo pip install urllib3
 
 Install tornado, requests, filemagic, and fabric
 
@@ -66,18 +68,18 @@ Subsequent versions of this package will include a form generator, but for now, 
 To install (no need to run after install-- it already does):
 		
 		cd /scripts/py/
-		ln -s ../../conf.py .
+		ln -s ../../conf/conf.py .
 		
         cd /scripts/py
-        sudo unveillance.py install
+        sudo python unveillance.py install
 
 To run:
 
         cd /scripts/py
-        sudo unveillance.py run
+        sudo python unveillance.py run
 
 To stop:
 
         cd /scripts/py
-        sudo unveillance.py stop
+        sudo python unveillance.py stop
 

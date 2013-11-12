@@ -5,7 +5,7 @@ from requests import exceptions
 
 from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
-from conf import sync, sync_sleep, assets_root, j3m, scripts_home
+from conf import sync, sync_sleep, log_root, j3m, scripts_home
 
 def watch(only_sources=False, only_submissions=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.

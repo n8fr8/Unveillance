@@ -3,26 +3,26 @@ from time import sleep, time
 from multiprocessing import Process
 from math import fabs
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, assets_root, sync_sleep, public_user, api, import_directory
+from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch
 
 files = {
 	"daemon" : {
-		"log" : "%sdaemon_log.txt" % assets_root,
-		"pid" : "%sdaemon_pid.txt" % assets_root
+		"log" : "%sdaemon_log.txt" % log_root,
+		"pid" : "%sdaemon_pid.txt" % log_root
 	},
 	"api" : {
-		"log" : "%sapi_log.txt" % assets_root,
-		"pid" : "%sapi_pid.txt" % assets_root,
+		"log" : "%sapi_log.txt" % log_root,
+		"pid" : "%sapi_pid.txt" % log_root,
 		"runs_on" : api['port']
 	},
 	"elasticsearch" : {
-		"log" : "%selasticsearch_log.txt" % assets_root,
-		"pid" : "%selasticsearch_pid.txt" % assets_root,
+		"log" : "%selasticsearch_log.txt" % log_root,
+		"pid" : "%selasticsearch_pid.txt" % log_root,
 		"runs_on" : 9200,
-		"status" : "%selasticsearch_status.txt" % assets_root
+		"status" : "%selasticsearch_status.txt" % log_root
 	}
 }
 
@@ -67,10 +67,10 @@ def initElasticsearch():
 	elasticsearch.createIndex(reindex=True)
 	
 def initFiles():
-	subprocess.Popen(["mkdir","%ssources" % assets_root])
-	subprocess.Popen(["mkdir","%ssubmissions" % assets_root])		
-	subprocess.Popen(["mkdir","%stmp" % assets_root])
-	subprocess.Popen(["touch","%sreindex.txt" % assets_root])
+	subprocess.Popen(["mkdir","%ssources" % log_root])
+	subprocess.Popen(["mkdir","%ssubmissions" % log_root])		
+	subprocess.Popen(["mkdir","%stmp" % log_root])
+	subprocess.Popen(["touch","%sreindex.txt" % log_root])
 	
 	for file, vals in files.iteritems():
 		subprocess.Popen(["touch",vals['pid']])
@@ -102,8 +102,9 @@ def initFiles():
 	subprocess.Popen(["chmod", "+x", "%sj3mparser.out" % j3m['root']])
 
 def startElasticsearch():
+	print "starting elasticsearch %sbin/elasticsearch" % elasticsearch_home	
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
-	
+
 	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f'], stdout=subprocess.PIPE, close_fds=True)
 	data = p.stdout.readline()
 
@@ -126,7 +127,8 @@ def startElasticsearch():
 def startAPI():
 	daemonize(files['api']['log'], files['api']['pid'])
 	p = subprocess.Popen(["python","%sapi.py" % scripts_home['python']])
-	
+        print p.stdout.readline()	
+
 	while True:
 		pass
 
@@ -171,7 +173,7 @@ if __name__ == "__main__":
 		sys.exit("Unveillance usage: install, run, or stop (-i, -r, or -s)")
 
 	mode = 1
-	if sys.argv[1] == "-r" or sys.argv[1] == "run":
+	if sys.argv[1] == "-r" or sys.argv[1] == "start":
 		mode = 2
 	elif sys.argv[1] == "-s" or sys.argv[1] == "stop":
 		mode = 3
@@ -245,13 +247,14 @@ if __name__ == "__main__":
 	
 	p = Process(target=startElasticsearch)
 	p.start()
-	
+
+        print "database started"
 	elasticsearch_started = False
 	while not elasticsearch_started:
 		try:
-			f = open(files['elasticsearch']['status'], 'rb')
-			if f.read().strip() == "True":
-				elasticsearch_started = True
+			print "checking for database process"
+			f = open(files['elasticsearch']['pid'], 'rb')
+			elasticsearch_started = True
 			f.close()
 		except IOError as e:
 			pass

@@ -1,7 +1,7 @@
 import gnupg, json, os, re
 
 from asset import Asset
-from conf import gnupg_home, assets_root, invalidate
+from conf import gnupg_home, log_root, invalidate
 from InformaCamUtils.funcs import ShellReader
 
 class Source(Asset):
@@ -19,7 +19,7 @@ class Source(Asset):
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Source, self).makeDir(os.path.join("%ssources" % assets_root, self._id))
+			super(Source, self).makeDir(os.path.join("%ssources" % log_root, self._id))
 			
 		if package_content is not None:
 			if self.addFile(self.file_name, package_content):

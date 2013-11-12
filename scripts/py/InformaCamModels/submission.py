@@ -2,7 +2,7 @@ import os, sys
 
 from asset import Asset
 from j3m import J3M
-from conf import assets_root, j3m, scripts_home, invalidate
+from conf import log_root, j3m, scripts_home, invalidate
 
 class Submission(Asset):
 	def __init__(self, inflate=None, _id=None):
@@ -19,7 +19,7 @@ class Submission(Asset):
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Submission, self).makeDir(os.path.join("%ssubmissions" % assets_root, self._id))
+			super(Submission, self).makeDir(os.path.join("%ssubmissions" % log_root, self._id))
 		
 		if package_content is not None:
 			if self.addFile(self.file_name, package_content):

@@ -2,24 +2,25 @@
 	STATIC PATHS:
 	In this section, fill in all of these values with whatever makes sense to you.
 """
-public_user = "USER_NAME"
-conf = "/path/to/your/conf/"
-assets_root = "/path/to/your/assets/"
-gnupg_home = "/path/to/your/users/.gnupg"
-forms_root = "/path/to/your/forms/"
+public_user = "some_user_name"
+main_dir = "where_is_unveillance_installed"
+conf = "%sconf/" % main_dir
+log_root = "%slog/" % main_dir
+gnupg_home = "/home/n8fr8/.gnupg/"
+forms_root = "%sforms/" % main_dir
 scripts_home = {
-	"python" : '/path/to/Unveillance/scripts/py/'
+	"python" : "%sscripts/py/" % main_dir
 }
-elasticsearch_home = "/path/to/where/you/put/elasticsearch/"
-secret_key_path = '/path/to/your/secret/key/for/gnupg/key.asc'
-gnugp_pwd = "/path/to/your/gpg/password"
+elasticsearch_home = "/usr/share/elasticsearch/"
+secret_key_path = "%sconf/privkey.asc" % main_dir
+gnupg_pwd = "%sconf/privkeypassword" % main_dir
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
 anon_iv = "16 bytes of goodness"	# 16
 
 j3m = {
-	"root" : "/path/to/where/you/have/packages/j3m/"
+	"root" : "%spackages/j3m/" % main_dir
 }
 
 """
@@ -30,8 +31,7 @@ j3m = {
 	All private keys should be put in your conf folder so we can reference them.
 """
 sync = [
-	'import',
-	'globaleaks'
+	'import'
 ]
 
 drive = {
@@ -40,7 +40,7 @@ drive = {
 	"asset_root" : "GOOGLE DRIVE ID OF FOLDER WHERE YOUR SUBMISSIONS ARE HELD",
 	"absorbed_flag" : "absorbedByInformaCam",
 	"asset_id" : "google service account email",
-	"absorbed_log" : "%sabsorbedByInformaCam_gd.tx" % assets_root,
+	"absorbed_log" : "%sabsorbedByInformaCam_gd.tx" % log_root,
 }
 
 globaleaks = {
@@ -49,14 +49,14 @@ globaleaks = {
 	"user" : "user",
 	"context_gus" : "GL CONTEXT GUS",
 	"identity_file" : "%sgltest1.pem" % conf,
-	"absorbed_log" : "%sabsorbedByInformaCam_gl.txt" % assets_root,
+	"absorbed_log" : "%sabsorbedByInformaCam_gl.txt" % log_root,
 	"absorbed_flag" : "absorbedByInformaCam",
 	"public_url" : "http://WHATEVER_PUBLIC_URL.onion"
 }
 
 import_directory = {
-	"asset_root" : "/where/will/you/put/imported/media/",
-	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % assets_root
+	"asset_root" : "%smedia/" % main_dir,
+	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % log_root
 }
 
 """
@@ -68,19 +68,22 @@ import_directory = {
 	Those files must be in your forms_root.
 """
 organization_fingerprint = "FULL FINGERPRINT PLEASE"
-organization_name = "What do we call you?"
+organization_name = "Some Org Inc."
 organization_details = "What else do you have to say?"
-public_key_path = '/where/is/your/public/key.asc'
+public_key_path = '%sconf/pubkey.asc' % main_dir
 
+forms = [] 
+"""
 forms = [
 	'%siWitness_free_text.xml' % forms_root,
 	'%siWitness_free_audio.xml' % forms_root,
 	'%siWitness_v_1_0.xml' % forms_root
 ]
+"""
 
+repositories = []
 """
 	If you don't support any of these repositories, remove their entries
-"""
 repositories = [
 	{
 		'source': 'google_drive',
@@ -94,6 +97,7 @@ repositories = [
 	}
 
 ]
+"""
 
 """
 	NOTHING ELSE TO CHANGE!  Don't worry about the rest of these values!
@@ -104,7 +108,7 @@ validity_buffer = {
 	'stale_data' : ((((60 * 1000) * 60) * 24) * 30) # 30 days
 }
 
-submissions_dump = "%ssubmissions/" % assets_root
+submissions_dump = "%ssubmissions/" % log_root
 
 api = {
 	'port' : 8080,

@@ -36,8 +36,8 @@ class Asset():
 						"reason" : invalidate['reasons']['unindexible']
 					}
 					
-					from conf import assets_root
-					f = open("%reindex.txt" % assets_root, "a+")
+					from conf import log_root
+					f = open("%reindex.txt" % log_root, "a+")
 					f.write(self._id)
 					f.close()
 					
