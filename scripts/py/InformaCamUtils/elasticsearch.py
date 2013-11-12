@@ -121,7 +121,7 @@ class Elasticsearch():
 			return False	
 	
 	def query(self, params):
-		url = "%s%s/_search?size=30" % (self.el, self.river)
+		url = "%s%s/_search?size=50" % (self.el, self.river)
 		
 		q = self.buildQuery(params)
 		if q is None:

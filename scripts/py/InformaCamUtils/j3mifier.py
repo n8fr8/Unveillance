@@ -245,7 +245,7 @@ class J3Mifier(threading.Thread):
 
 			ffmpeg_cmd = [
 				"ffmpeg", "-y", "-i", self.input,
-				"-vf", "scale=iw*%d:ih*%d" % (resolution[label][0], resolution[label][1]),
+				"-vf", "scale=iw*%.3f:ih*%.3f" % (resolution[label][0], resolution[label][1]),
 				os.path.join(self.output, "%s%s" % (label, self.file_name))
 			]
 
