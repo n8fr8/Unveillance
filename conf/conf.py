@@ -6,7 +6,7 @@ public_user = "some_user_name"
 main_dir = "where_is_unveillance_installed"
 conf = "%sconf/" % main_dir
 log_root = "%slog/" % main_dir
-gnupg_home = "/home/n8fr8/.gnupg/"
+gnupg_home = "/full/path/to/safe/dir/.gnupg/"
 forms_root = "%sforms/" % main_dir
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
