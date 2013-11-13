@@ -1,7 +1,7 @@
 import os, sys, hashlib, json, base64
 
 from asset import Asset
-from conf import assets_root
+from conf import assets_root, audio_form_data
 
 class J3M(Asset):
 	def __init__(self, path_to_j3m=None, _id=None, inflate=None):		
@@ -40,6 +40,17 @@ class J3M(Asset):
 		
 	def massageData(self, data):
 		try:
+			data['public_hash'] = hashlib.sha1(
+				"".join([
+					data['genealogy']['createdOnDevice'],
+					"".join(data['genealogy']['hashes'])
+				])
+			).hexdigest()
+			
+		except KeyError as e:
+			pass
+			
+		try:
 			loc = data['data']['exif']['location']
 			data['data']['exif']['location'] = [loc[1], loc[0]]
 		except KeyError as e:
@@ -66,5 +77,18 @@ class J3M(Asset):
 					playback['sensorPlayback']['visibleWifiNetworks'][i]['bt_hash'] = hashlib.sha1(b['bssid']).hexdigest()
 			except KeyError as e:
 				pass
+		
+		try:
+			for (i, a) in enumerate(data['data']['userAppendedData']):
+				for f in a['associatedForms']:
+					for k, v in f['answerData']:
+						if k in audio_form_data:
+							# un b64
+							# ungzip into audio file
+							# append proper extension for mime type
+							print "AUDIO FORM!"
+		except KeyError as e:
+			print e
+			pass
 				
 		return data

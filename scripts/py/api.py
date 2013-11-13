@@ -39,30 +39,28 @@ class Submissions(tornado.web.RequestHandler):
 	def get(self):
 		res = Res()
 		q = False
-		el = Elasticsearch(river="submissions")
 		
-		if(len(self.request.query) > 3):
-			clauses = []
-			op = None
+		
+		q_string = self.request.query
+		clauses = []
+		op = None
 			
-			for k,v in parseRequest(self.request.query).iteritems():
-				if k != "operator":
-					clauses.append({
-						"field" : k,
-						k : v
-					})
-				else:
-					op = v
-				
-			if len(clauses) > 1:
-				if op is None: op = "and"
-				q = el.query({
-					"operator" : op,
-					"clauses" : clauses
-				})
+		for k,v in parseRequest(self.request.query).iteritems():
+			if k == "operator":
+				op = v
 			else:
-				q = el.query({"clauses" : clauses})
-		else:
+				clauses.append({
+					"field" : k,
+					k : v
+				})
+		
+		el = Elasticsearch(river="j3m")
+		print clauses
+		
+		if len(clauses) == 1:
+			q = el.query({"clauses" : clauses})
+		elif len(clauses) == 0:
+			el = Elasticsearch(river="submissions")
 			q = el.query({
 				"clauses": [
 					{
@@ -71,7 +69,13 @@ class Submissions(tornado.web.RequestHandler):
 					}
 				]
 			})
-			
+		else:
+			if op is None: op = "and"
+			q = el.query({
+				"operator" : op,
+				"clauses" : clauses
+			})
+
 		if q is not False:
 			res.data = q
 			res.result = 200

@@ -1,4 +1,4 @@
-import requests, copy, json, sys, os
+import requests, copy, json, sys, os, re
 
 class Elasticsearch():
 	def __init__(self, river=None):
@@ -54,14 +54,31 @@ class Elasticsearch():
 	
 	def createIndex(self, reindex=True):
 		mappings = {
+			"submissions": {
+				"properties": {
+					"asset_path": {
+						"type" : "string",
+						"store" : True
+					}
+				}
+			},
 			"j3m" : {
 				"properties" : {
+					"asset_path": {
+						"type" : "string",
+						"store" : True
+					},
+					"public_hash" : {
+						"type" : "string",
+						"store" : True
+					},
 					"data" : {
 						"properties" : {
 							"exif" : {
 								"properties" : {
 									"location" : {
-										"type" : "geo_point"
+										"type" : "geo_point",
+										"store" : True
 									}
 								}
 							},
@@ -93,6 +110,22 @@ class Elasticsearch():
 										}
 									}
 								}
+							}
+						}
+					},
+					"genealogy" : {
+						"properties" : {
+							"createdOnDevice" : {
+								"type" : "string",
+								"store" : True
+							},
+							"dateCreated" : {
+								"type" : "long",
+								"store" : True
+							},
+							"hashes" : {
+								"type" : "string",
+								"store" : True
 							}
 						}
 					}
@@ -127,8 +160,9 @@ class Elasticsearch():
 		if q is None:
 			return False
 
-		print q
+		print q['fields']
 		query = {
+			"fields" : q['fields'],
 			"query" : {
 				"filtered" : {
 					"query" : q['query'],
@@ -137,9 +171,17 @@ class Elasticsearch():
 			},
 			"sort" : q['sort']
 		}
+		
 		if len(q['filters'].keys()) == 0:
 			del query['query']['filtered']['filter']
-		print query
+		
+		del query['fields']
+		'''
+		if query['fields'] is None:
+			del query['fields']
+		'''
+		
+		print "QUERY I USE:\n%s" % query
 		
 		proc_res = []
 		r = requests.get(url, data=json.dumps(query))
@@ -193,7 +235,8 @@ class Elasticsearch():
 		clauses = []
 		query = {
 			"query" : None,
-			"filters" : {}
+			"filters" : {},
+			"fields" : None,
 		}
 		o = None
 		
@@ -206,6 +249,11 @@ class Elasticsearch():
 					try:
 						if clause['field'] == "get_all":
 							query['query'] = match_all
+							if not clause['get_all'] and self.river == "j3m":
+								print "WITH J3M FILTER!"
+								# just give me location, asset_path (for now...)
+								query['fields'] = ["data.exif.location", "asset_path"]
+								
 							query['sort'] = sort
 							return query
 						elif clause['field'] == "location":
@@ -268,7 +316,7 @@ class Elasticsearch():
 										}
 									}
 									clauses.append(c)	
-							continue
+							continue	#???
 							
 						elif clause['field'] == "bssid":
 							bssid = hashlib.sha1(clause['bssid']).hexdigest()
@@ -320,6 +368,18 @@ class Elasticsearch():
 								}
 							}
 							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
+							
+						elif clause['field'] == "public_hash":
+							if re.match(r'[a-zA-Z0-9]{40}', clause['public_hash']):
+								c = {
+									"bool" : {
+										"must" : {
+											"term" : {
+												"public_hash" : clause['public_hash']
+											}
+										}
+									}
+								}
 								
 						if c is not None:
 							clauses.append(c)
@@ -355,6 +415,5 @@ class Elasticsearch():
 				query['filters'][o].append(clause)
 			else:
 				query['filters'][clause.keys()[0]] = clause[clause.keys()[0]]
-		
 		return query
 		
