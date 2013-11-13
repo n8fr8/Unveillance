@@ -6,12 +6,14 @@ You should already have Java installed (OpenJRE 7 is what I like) and JAVA_HOME 
 
 After cloning, run
 
-    git submodules update --init --recursive
+    git submodule update --init --recursive
 
 Install dependencies (not included in packaging):
 
-    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools
+    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof
     easy_install --upgrade google-api-python-client
+    sudo pip install oauth2client
+	sudo pip install urllib3
 
 Install tornado, requests, filemagic, and fabric
 
@@ -37,12 +39,16 @@ Install FFmpeg2theora (not included in packaging):
     
 Config:
 
-The config file must be modified.  It is located in:
+The configuration file must be completed.  It is located in:
 
-    /conf/conf.py
+    /conf/conf.py.example
+
+Please copy the example to:
+
+	/conf/conf.py
 
 It's pretty well documented, but there is no setup wizard yet.
-Subsequent versions of this package will probably make that easier.
+Subsequent versions of this package will make that easier.
 
 Authentication:
 
@@ -67,17 +73,15 @@ To install (no need to run after install-- it already does):
 		
 		cd /scripts/py/
 		ln -s ../../conf.py .
-		
-        cd /scripts/py
-        sudo unveillance.py install
+        sudo python unveillance.py install
 
 To run:
 
         cd /scripts/py
-        sudo unveillance.py run
+        sudo python unveillance.py run
 
 To stop:
 
         cd /scripts/py
-        sudo unveillance.py stop
+        sudo python unveillance.py stop
 

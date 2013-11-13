@@ -40,8 +40,6 @@ class Submissions(tornado.web.RequestHandler):
 		res = Res()
 		q = False
 		
-		
-		q_string = self.request.query
 		clauses = []
 		op = None
 			
@@ -55,17 +53,15 @@ class Submissions(tornado.web.RequestHandler):
 				})
 		
 		el = Elasticsearch(river="j3m")
-		print clauses
 		
 		if len(clauses) == 1:
 			q = el.query({"clauses" : clauses})
 		elif len(clauses) == 0:
-			el = Elasticsearch(river="submissions")
 			q = el.query({
 				"clauses": [
 					{
 						"field" : "get_all",
-						"type" : "submission"
+						"get_all" : False
 					}
 				]
 			})
@@ -121,40 +117,39 @@ class Sources(tornado.web.RequestHandler):
 	def get(self):
 		res = Res()
 		q = False
+		
+		clauses = []
+		op = None
+		
+		for k,v in parseRequest(self.request.query).iteritems():
+			if k == "operator":
+				op = v
+			else:
+				clauses.append({
+					"field" : k,
+					k : v
+				})
+		
 		el = Elasticsearch(river="sources")
 		
-		if(len(self.request.query) > 3):
-			clauses = []
-			op = None
-			
-			for k,v in parseRequest(self.request.query).iteritems():
-				if k != "operator":
-					clauses.append({
-						"field" : k,
-						k : v
-					})
-				else:
-					op = v
-				
-			if len(clauses) > 1:
-				if op is None: op = "and"
-				q = el.query({
-					"operator" : op,
-					"clauses" : clauses
-				})
-			else:
-				q = el.query({"clauses" : clauses})
-			
-		else:
+		if len(clauses) == 1:
+			q = el.query({"clauses" : clauses})
+		elif len(clauses) == 0:
 			q = el.query({
 				"clauses": [
 					{
 						"field" : "get_all",
-						"type" : "source"
+						"get_all" : False
 					}
 				]
 			})
-			
+		else:
+			if op is None: op = "and"
+			q = el.query({
+				"operator" : op,
+				"clauses" : clauses
+			})
+
 		if q is not False:
 			res.data = q
 			res.result = 200

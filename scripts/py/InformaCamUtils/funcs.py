@@ -165,7 +165,7 @@ def parseRequest(request_string):
 		pass
 
 	params = dict()
-	for kvp in request_string.split("&"):
+	for kvp in [word for word in request_string.split("&") if word != ""]:
 		k = kvp.split("=")[0]
 		
 		v = kvp.split("=")[1]

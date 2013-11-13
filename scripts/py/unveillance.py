@@ -3,26 +3,26 @@ from time import sleep, time
 from multiprocessing import Process
 from math import fabs
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, assets_root, sync_sleep, public_user, api, import_directory
+from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch
 
 files = {
 	"daemon" : {
-		"log" : "%sdaemon_log.txt" % assets_root,
-		"pid" : "%sdaemon_pid.txt" % assets_root
+		"log" : "%sdaemon_log.txt" % log_root,
+		"pid" : "%sdaemon_pid.txt" % log_root
 	},
 	"api" : {
-		"log" : "%sapi_log.txt" % assets_root,
-		"pid" : "%sapi_pid.txt" % assets_root,
+		"log" : "%sapi_log.txt" % log_root,
+		"pid" : "%sapi_pid.txt" % log_root,
 		"runs_on" : api['port']
 	},
 	"elasticsearch" : {
-		"log" : "%selasticsearch_log.txt" % assets_root,
-		"pid" : "%selasticsearch_pid.txt" % assets_root,
+		"log" : "%selasticsearch_log.txt" % log_root,
+		"pid" : "%selasticsearch_pid.txt" % log_root,
 		"runs_on" : 9200,
-		"status" : "%selasticsearch_status.txt" % assets_root
+		"status" : "%selasticsearch_status.txt" % log_root
 	}
 }
 
@@ -67,10 +67,10 @@ def initElasticsearch():
 	elasticsearch.createIndex(reindex=True)
 	
 def initFiles():
-	subprocess.Popen(["mkdir","%ssources" % assets_root])
-	subprocess.Popen(["mkdir","%ssubmissions" % assets_root])		
-	subprocess.Popen(["mkdir","%stmp" % assets_root])
-	subprocess.Popen(["touch","%sreindex.txt" % assets_root])
+	subprocess.Popen(["mkdir","%ssources" % log_root])
+	subprocess.Popen(["mkdir","%ssubmissions" % log_root])		
+	subprocess.Popen(["mkdir","%stmp" % log_root])
+	subprocess.Popen(["touch","%sreindex.txt" % log_root])
 	
 	for file, vals in files.iteritems():
 		subprocess.Popen(["touch",vals['pid']])
@@ -168,13 +168,19 @@ def startIntake():
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
-		sys.exit("Unveillance usage: install, run, or stop (-i, -r, or -s)")
+		sys.exit("Unveillance usage: install, start, stop, or reindex (-i, -r, -s, or -x)")
 
-	mode = 1
-	if sys.argv[1] == "-r" or sys.argv[1] == "run":
+	mode = -1
+	if sys.argv[1] == "-r" or sys.argv[1] == "start":
 		mode = 2
 	elif sys.argv[1] == "-s" or sys.argv[1] == "stop":
 		mode = 3
+	elif sys.argv[1] == "-x" or sys.argv[1] == "reindex":
+		mode = 4
+	elif sys.argv[1] == "-i" or sys.argv[1] == "install":
+		mode = 1
+	else:
+		sys.exit("Unveillance usage: install, start, stop, or reindex (-i, -r, -s, or -x)")
 
 	if mode == 1:
 		print "Setting up the Unveillance package\n"
@@ -222,6 +228,19 @@ if __name__ == "__main__":
 					print "\tDaemon \"%s\" was already stopped.\n" % file
 		
 		print "Goodbye!\n\n"
+		sys.exit(0)
+	elif mode == 4:
+		print "Reindexing Unveillance Data\n"
+		'''
+		initElasticsearch()
+		from InformaCamModels.submission import Submission
+		for root_, dirs_, files_ in os.walk(os.path.join(assets_root, "submissions")):
+			for dir_ in dirs_:
+				print dir_
+				
+			for file_ in files_:
+				pass
+		'''
 		sys.exit(0)
 		
 	print "Starting up your database..."
