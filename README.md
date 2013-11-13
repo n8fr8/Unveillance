@@ -10,10 +10,11 @@ After cloning, run
 
 Install dependencies (not included in packaging):
 
-    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools
+    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof
     easy_install --upgrade google-api-python-client
     sudo pip install oauth2client
     sudo pip install urllib3
+
 
 Install tornado, requests, filemagic, and fabric
 
@@ -39,12 +40,16 @@ Install FFmpeg2theora (not included in packaging):
     
 Config:
 
-The config file must be modified.  It is located in:
+The configuration file must be completed.  It is located in:
 
-    /conf/conf.py
+    /conf/conf.py.example
+
+Please copy the example to:
+
+   /conf/conf.py
 
 It's pretty well documented, but there is no setup wizard yet.
-Subsequent versions of this package will probably make that easier.
+Subsequent versions of this package will make that easier.
 
 Authentication:
 
@@ -61,25 +66,26 @@ to protect them.
 Forms:
 
 We support OpenJDK/JavaRosa forms.  For more information on how to generate them, please visit http://www.kobotoolbox.org/
-Subsequent versions of this package will include a form generator, but for now, you're on your own.  All forms MUST be placed in /forms
+Subsequent versions of this package will include a form generator, but for now, you're on your own.  
+
+All forms MUST be placed in /forms
 
 #USAGE
 
+The server can run as the current user. SUDO is not needed.
+
 To install (no need to run after install-- it already does):
 		
-		cd /scripts/py/
-		ln -s ../../conf/conf.py .
+	cd /scripts/py/
+	ln -s ../../conf/conf.py .
 		
-        cd /scripts/py
-        sudo python unveillance.py install
+        python scripts/py/unveillance.py install
 
 To run:
 
-        cd /scripts/py
-        sudo python unveillance.py run
+        python scripts/py/unveillance.py start
 
 To stop:
 
-        cd /scripts/py
-        sudo python unveillance.py stop
+        python scripts/py/unveillance.py stop
 
