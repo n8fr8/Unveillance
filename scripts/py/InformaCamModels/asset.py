@@ -37,7 +37,7 @@ class Asset():
 					}
 					
 					from conf import assets_root
-					f = open("%reindex.txt" % assets_root, "a+")
+					f = open("%sreindex.txt" % assets_root, "a+")
 					f.write(self._id)
 					f.close()
 					
