@@ -11,9 +11,7 @@ class Elasticsearch():
 	def get(self, _id, river):
 		r = requests.get("%s%s/%s" % (self.el, river, _id))
 		res = json.loads(r.text)
-		
-		print res
-		
+				
 		try:
 			if res['exists']:
 				return res['_source']
@@ -35,9 +33,9 @@ class Elasticsearch():
 	def index(self, asset):
 		r = requests.put("%s%s/%s" % (self.el, self.river, asset._id), data=json.dumps(asset.emit(exclude=['_id'])))
 		res = json.loads(r.text)
-		print res
 		
 		try:
+			print res['ok']
 			return res['ok']
 		except KeyError as e:
 			print e

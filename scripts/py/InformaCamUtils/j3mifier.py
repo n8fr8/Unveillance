@@ -13,13 +13,14 @@ resolutions = [
 ]
 
 class J3Mifier(threading.Thread):
-	def __init__(self, submission):
+	def __init__(self, submission, on_reindex=False):
 		threading.Thread.__init__(self)
 		
 		self.input = os.path.join(submission.asset_path, submission.file_name)
 		self.output = submission.asset_path
 		self.file_name = submission.file_name
 		self.submission = submission
+		self.on_reindex = on_reindex
 		
 	def run(self):
 		print "j3mifying %s" % self.submission.asset_path		
@@ -75,8 +76,9 @@ class J3Mifier(threading.Thread):
 		txt.close()
 
 		if self.getJ3MMetadata():
-			p = Process(target=self.makeDerivativeImages)
-			p.start()
+			if not self.on_reindex:
+				p = Process(target=self.makeDerivativeImages)
+				p.start()
 			return True
 				
 		return False
@@ -98,9 +100,10 @@ class J3Mifier(threading.Thread):
 		ffmpeg.join()
 
 		if self.getJ3MMetadata():
-
-			p = Process(target=self.makeDerivativeVideos)
-			p.start()
+			if not self.on_reindex:
+				p = Process(target=self.makeDerivativeVideos)
+				p.start()
+				
 			return True
 		
 		# json read that file and return object
@@ -175,6 +178,7 @@ class J3Mifier(threading.Thread):
 					return False
 			elif file_tipe == mime_types['gzip']:
 				# this was already a gzip; skip
+				print "THIS WAS ALREADY A GZIP: %s.txt.unb64" % self.input[:-4]
 				os.rename("%s.txt.unb64" % self.input[:-4], "%s.j3m.gzip" % self.input[:-4])
 			
 
@@ -268,15 +272,17 @@ class J3Mifier(threading.Thread):
 
 		hires_cmd = [
 			"cp", "%s.mp4" % self.input[:-4],
-			os.path.join(self.output, "high_%s" % self.file_name)
+			os.path.join(self.output, "high_%s.mp4" % self.file_name[:-4])
 		]
 		hires = ShellThreader(hires_cmd)
 		hires.start()
 		hires.join()
+		print hires_cmd
 
 		ogv_cmd = [
-			"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "high_%s" % self.file_name)[:-4]
+			"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "high_%s" % self.file_name[:-4])
 		]
+		print ogv_cmd
 		ogv = ShellThreader(ogv_cmd)
 		ogv.start()
 		ogv.join()

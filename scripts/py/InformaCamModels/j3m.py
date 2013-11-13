@@ -1,7 +1,7 @@
 import os, sys, hashlib, json, base64
 
 from asset import Asset
-from conf import assets_root, audio_form_data
+from conf import assets_root, audio_form_data, mime_types
 
 class J3M(Asset):
 	def __init__(self, path_to_j3m=None, _id=None, inflate=None):		
@@ -15,7 +15,7 @@ class J3M(Asset):
 				j.close()
 				return
 
-			inflate = self.massageData(data)
+			inflate = self.massageData(data, path_to_j3m)
 			inflate['_id'] = self.generateId(data)
 			if inflate['_id'] is None:
 				return
@@ -27,8 +27,6 @@ class J3M(Asset):
 			self.file_name = os.path.basename(path_to_j3m)
 			self.save()
 			print self._id
-		else:
-			print "no path to j3m?"
 
 	def generateId(self, data):
 		try:
@@ -38,7 +36,13 @@ class J3M(Asset):
 
 		return None
 		
-	def massageData(self, data):
+	def massageData(self, data, path_to_j3m):
+		from base64 import b64decode
+		import magic
+		from InformaCamUtils.funcs import unGzipAsset, ShellThreader
+		
+		base = path_to_j3m[:-4]		
+		
 		try:
 			data['public_hash'] = hashlib.sha1(
 				"".join([
@@ -48,6 +52,7 @@ class J3M(Asset):
 			).hexdigest()
 			
 		except KeyError as e:
+			print e
 			pass
 			
 		try:
@@ -78,17 +83,72 @@ class J3M(Asset):
 			except KeyError as e:
 				pass
 		
+		'''
 		try:
 			for (i, a) in enumerate(data['data']['userAppendedData']):
-				for f in a['associatedForms']:
-					for k, v in f['answerData']:
-						if k in audio_form_data:
-							# un b64
+				for (idx, f) in enumerate(a['associatedForms']):						
+					for ad in f['answerData'].iteritems():
+						if ad in audio_form_data:
+							v = f['answerData'][ad]
+							
+							audio_base = "%s_audio_%d" % (base, idx)
+							unb64 = open("%s.3gp.gzip" % audio_base, "wb+")
+							
+							try:
+								unb64.write(b64decode(v))
+							except TypeError as e:
+								try:
+									v += "=" * ((4 - len(v) % 4) % 4)
+									unb64.write(b64decode(v))
+								except TypeError as e:
+									print e
+									unb64.close()
+									continue
+							
+							unb64.close()
+							m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
+							try:
+								file_type = m.id_filename("%s.3gp.gzip" % audio_base)
+								print "FILE TYPE: %s" % file_type
+								m.close()
+								
+								if file_type != mime_types['gzip']:
+									continue
+							except:
+								m.close()
+								continue
+							
 							# ungzip into audio file
+							audio = open("%s.3gp" % audio_base, 'wb+')
+							audio.write(unGzipAsset("%s.3gp.gzip" % audio_base))
+							
+							audio.close()
+							m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
+							try:
+								file_type = m.id_filename("%s.3gp" % audio_base)
+								print "AUDIO TYPE: %s" % file_type
+								m.close()
+								
+								if file_type != mime_types['3gp']:
+									continue
+								
+							except:
+								m.close()
+								continue
+							
 							# append proper extension for mime type
-							print "AUDIO FORM!"
+							ffmpeg = ShellThreader([
+								"ffmpeg", "-y", "-i", "%s.3gp" % audio_base, 
+								"-vn", "-acodec", "mp2", "-ar", "22050", 
+								"-f", "wav", "%s.wav" % audio_base
+							])
+							ffmpeg.start()
+							ffmpeg.join()
+							
+							f['answerData'][ad] = "%s.wav" % audio_base
 		except KeyError as e:
 			print e
 			pass
+		'''
 				
 		return data

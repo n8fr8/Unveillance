@@ -5,7 +5,45 @@ from requests import exceptions
 
 from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
-from conf import sync, sync_sleep, j3m, scripts_home
+from conf import sync, sync_sleep, j3m, scripts_home, assets_root
+
+def reindex():
+	assets = {'submissions':[], 'sources':[]}
+	
+	for mode in assets.keys():
+		for root_, dirs_, files_ in os.walk(os.path.join(assets_root, mode)):
+			for dir_ in dirs_:
+				if mode == "submissions":
+					a = Submission(_id=dir_)					
+					
+				elif mode == "sources":
+					a = Source(_id=dir_)
+
+				assets[mode].append(a.emit())
+		
+		print "num %s: %d" % (mode, len(assets[mode]))
+	
+	#reindex elasticsearch
+	from InformaCamUtils.elasticsearch import Elasticsearch
+	elasticsearch = Elasticsearch()
+	elasticsearch.createIndex(reindex=True)
+	
+	for mode, group in assets.iteritems():
+		for a in group:
+			if mode == "submissions":
+				try:
+					del a['j3m_id']
+				except KeyError as e:
+					pass
+					
+				s = Submission(inflate=a)
+				s.j3mify(on_reindex=True)
+				print s.emit()
+			elif mode == "sources":
+				s = Source(inflate=a)
+				print s.emit()
+			
+			print "\n"
 
 def watch(only_sources=False, only_submissions=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.
