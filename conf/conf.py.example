@@ -12,7 +12,7 @@ forms_root = "%sforms/" % main_dir
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
 }
-elasticsearch_home = "%bin/elasticsearch/" % main_dir
+elasticsearch_home = "%packages/elasticsearch/" % main_dir
 secret_key_path = "%sconf/privkey.asc" % main_dir
 gnupg_pwd = "%sconf/privkeypassword" % main_dir
 
