@@ -98,6 +98,7 @@ repositories = [
 """
 	NOTHING ELSE TO CHANGE!  Don't worry about the rest of these values!
 """
+log_root = assets_root
 sync_sleep = 2	# minutes
 validity_buffer = {
 	'location' : (5 * 60 * 1000), # 5 minutes
@@ -156,7 +157,8 @@ mime_types = {
         'video' : "video/x-matroska",
         'wildcard' : "application/octet-stream",
         'pgp' : "application/pgp",
-        'gzip' : "application/x-gzip"
+        'gzip' : "application/x-gzip",
+        '3gp' : 'video/3gpp'
 }
 
 mime_type_map = {
@@ -166,5 +168,6 @@ mime_type_map = {
         'video/x-matroska': "mkv",
         'application/octet-stream': 'wildcard',
         'application/pgp' : 'pgp',
-        'application/x-gzip' : 'gzip'
+        'application/x-gzip' : 'gzip',
+        'video/3gpp' : '3gp'
 }
