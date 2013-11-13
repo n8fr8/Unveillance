@@ -2,11 +2,11 @@
 	STATIC PATHS:
 	In this section, fill in all of these values with whatever makes sense to you.
 """
-public_user = "some_user_name"
-main_dir = "where_is_unveillance_installed"
+public_user = "n8fr8"
+main_dir = "/home/n8fr8/dev/repos/Unveillance/"
 conf = "%sconf/" % main_dir
 log_root = "%slog/" % main_dir
-gnupg_home = "/full/path/to/safe/dir/.gnupg/"
+gnupg_home = "/home/n8fr8/.gnupg/"
 forms_root = "%sforms/" % main_dir
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
@@ -55,7 +55,7 @@ globaleaks = {
 }
 
 import_directory = {
-	"asset_root" : "%smedia/" % main_dir,
+	"asset_root" : "%ssubmissions/" % main_dir,
 	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % log_root
 }
 
