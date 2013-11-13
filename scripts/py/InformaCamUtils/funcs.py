@@ -260,7 +260,7 @@ def unUnicode(data):
 		return AsTrueValue(unicode.join(u'\n', map(unicode, data)))
 		
 def ShellReader(cmd, omitNewLine = True, do_print=True):
-	#print "CMD: %s" % cmd
+	print "CMD: %s" % cmd
 
 	data_read = []
 	ex = subprocess.Popen(

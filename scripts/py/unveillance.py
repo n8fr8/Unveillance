@@ -142,10 +142,15 @@ def startIntake():
 	daemonize(files['daemon']['log'],files['daemon']['pid'])
 	
 	signal.signal(signal.SIGIO, watchHandler)
+	print "starting import %s" % import_directory['asset_root']
+
 	f = os.open(import_directory['asset_root'], os.O_RDONLY)
 	fcntl.fcntl(f, fcntl.F_SETSIG, 0)
-	fcntl.fcntl(f, fcntl.F_NOTIFY, fcntl.DN_MODIFY | fcntl.DN_MULTISHOT)
-	
+	"""
+	this is not currently working on ubuntu
+	fcntl.fcntl(f, fcntl.F_NOTIFY, fcntl.DN_MODIFY | fcntl.DN_CREATE | fcntl.DN_MULTISHOT)
+	"""
+
 	global intake_status
 	global time_since_last_fired
 	global time_since_last_update
@@ -170,7 +175,7 @@ def startIntake():
 
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
-		sys.exit("Unveillance usage: install, run, or stop (-i, -r, or -s)")
+		sys.exit("Unveillance usage: install, start, or stop (-i, -r, or -s)")
 
 	mode = 1
 	if sys.argv[1] == "-r" or sys.argv[1] == "start":
@@ -201,7 +206,7 @@ if __name__ == "__main__":
 				proc.start()
 				proc.join()
 				for pid in proc.output:
-					#print pid
+					print pid
 					subprocess.Popen(['kill', pid])
 
 			except KeyError as e:
@@ -244,7 +249,8 @@ if __name__ == "__main__":
 			el_install.join()
 			
 	print "please wait..."
-	
+
+	"""	
 	p = Process(target=startElasticsearch)
 	p.start()
 
@@ -262,6 +268,7 @@ if __name__ == "__main__":
 		sleep(5)
 		
 	print "done.\n"
+	"""
 	
 	if mode == 1:
 		print "Installing your secret key..."
