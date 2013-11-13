@@ -109,7 +109,7 @@ validity_buffer = {
 	'stale_data' : ((((60 * 1000) * 60) * 24) * 30) # 30 days
 }
 
-submissions_dump = "%ssubmissions/" % log_root
+submissions_dump = "%ssubmissions/" % assets_root
 
 api = {
 	'port' : 8080,
@@ -161,7 +161,8 @@ mime_types = {
         'video' : "video/x-matroska",
         'wildcard' : "application/octet-stream",
         'pgp' : "application/pgp",
-        'gzip' : "application/x-gzip"
+        'gzip' : "application/x-gzip",
+        '3gp' : 'video/3gpp'
 }
 
 mime_type_map = {
@@ -171,5 +172,6 @@ mime_type_map = {
         'video/x-matroska': "mkv",
         'application/octet-stream': 'wildcard',
         'application/pgp' : 'pgp',
-        'application/x-gzip' : 'gzip'
+        'application/x-gzip' : 'gzip',
+        'video/3gpp' : '3gp'
 }
