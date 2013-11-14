@@ -146,16 +146,18 @@ class J3Mifier(threading.Thread):
 
 			# if file is either PGP or GZIP
 			if file_type != mime_types['pgp'] and file_type != mime_types['gzip']:
+				print "NOT SUPPORTED FILE TYPE"
 				return False
 
 			if file_type == mime_types['pgp']:
+				print "ATTEMPTING TO DECRYPT BLOB"
 				pwd = open(gnupg_pwd, 'rb')
 				passphrase = pwd.read().strip()
 				pwd.close()
 
 				gpg_cmd = [
 					"gpg", "--no-tty", "--passphrase", passphrase,
-					"--output", "%s.j3m.gzip" % self.input[:-4], 
+					"--output", "%s.j3m.gz" % self.input[:-4], 
 					"--decrypt", "%s.txt.unb64" % self.input[:-4],
 				]
 				gpg_thread = ShellThreader(gpg_cmd)
@@ -166,7 +168,7 @@ class J3Mifier(threading.Thread):
 				# check to see if this new output is a gzip
 				gpg_check = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 				try:
-					file_type = gpg_check.id_filename("%s.j3m.gzip" % self.input[:-4])
+					file_type = gpg_check.id_filename("%s.j3m.gz" % self.input[:-4])
 					print "NEW DOC TYPE: %s" % file_type
 				except:
 					print "STILL FAILED TO DECRYPT"
@@ -176,19 +178,19 @@ class J3Mifier(threading.Thread):
 				gpg_check.close()
 				if file_type != mime_types['gzip']:
 					return False
-			elif file_tipe == mime_types['gzip']:
+			elif file_type == mime_types['gzip']:
 				# this was already a gzip; skip
 				print "THIS WAS ALREADY A GZIP: %s.txt.unb64" % self.input[:-4]
-				os.rename("%s.txt.unb64" % self.input[:-4], "%s.j3m.gzip" % self.input[:-4])
+				os.rename("%s.txt.unb64" % self.input[:-4], "%s.j3m.gz" % self.input[:-4])
 			
 
 		except:
 			m.close()
 			return False
 
-		# un gzip [fname].j3m.gzip and save as [fname].j3m.orig
+		# un gzip [fname].j3m.gz and save as [fname].j3m.orig
 		j3m = open("%s.j3m.orig" % self.input[:-4], 'wb+')
-		j3m.write(unGzipAsset("%s.j3m.gzip" % self.input[:-4]))
+		j3m.write(unGzipAsset("%s.j3m.gz" % self.input[:-4]))
 		j3m.close()
 
 		# if [fname].j3m.orig is text/plain and is json-readable
