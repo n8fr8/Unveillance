@@ -142,7 +142,6 @@ def startIntake():
 	signal.signal(signal.SIGIO, watchHandler)
 	f = os.open(import_directory['asset_root'], os.O_RDONLY)
 	fcntl.fcntl(f, fcntl.F_SETSIG, 0)
-	fcntl.fcntl(f, fcntl.F_NOTIFY, fcntl.DN_MODIFY | fcntl.DN_MULTISHOT)
 	
 	global intake_status
 	global time_since_last_fired
