@@ -6,7 +6,7 @@ from math import fabs
 from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
-from intake import watch
+from intake import watch, reindex
 
 files = {
 	"daemon" : {
@@ -231,16 +231,7 @@ if __name__ == "__main__":
 		sys.exit(0)
 	elif mode == 4:
 		print "Reindexing Unveillance Data\n"
-		'''
-		initElasticsearch()
-		from InformaCamModels.submission import Submission
-		for root_, dirs_, files_ in os.walk(os.path.join(assets_root, "submissions")):
-			for dir_ in dirs_:
-				print dir_
-				
-			for file_ in files_:
-				pass
-		'''
+		reindex()
 		sys.exit(0)
 		
 	print "Starting up your database..."
