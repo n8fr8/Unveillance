@@ -42,8 +42,11 @@ class Submissions(tornado.web.RequestHandler):
 		
 		clauses = []
 		op = None
-			
+		
+		print parseRequest(self.request.query)
 		for k,v in parseRequest(self.request.query).iteritems():
+			print k
+			print v
 			if k == "operator":
 				op = v
 			else:
@@ -181,14 +184,13 @@ class Source(tornado.web.RequestHandler):
 		if passesParameterFilter(_id):
 			source = ICSource(_id=_id)
 			
-			if not hasattr(source, "invalid"):
-				for k,v in parseRequest(self.request.body).iteritems():
-					if k not in source.locked_fields:
-						setattr(source, k, v)
-				
-				if source.save():
-					res.data = source.emit()
-					res.result = 200
+			for k,v in parseRequest(self.request.body).iteritems():
+				if k not in source.locked_fields:
+					setattr(source, k, v)
+			
+			if source.save():
+				res.data = source.emit()
+				res.result = 200
 			
 		self.finish(res.emit())
 
@@ -204,13 +206,10 @@ class MediaHandler(tornado.web.RequestHandler):
 			as_file_name = "%s.jpg" % submission.file_name[:-4]
 		else:
 			as_file_name = submission.file_name
-			
-		path = "%s%s/%s_%s" % (
-			submissions_dump, 
-			_id, 
-			resolution, 
-			as_file_name
-		)
+		
+		path = "%s%s/%s_%s" % (submissions_dump, _id, resolution, as_file_name)
+		if resolution == "orig":
+			path = "%s%s/%s" % (submissions_dump, _id, as_file_name)
 		
 		f = open(path, 'rb')
 		if resolution != "thumb":
@@ -242,7 +241,7 @@ routes = [
 	(r"/submission/([a-zA-Z0-9]{32})/", Submission, dict(_id=None)),
 	(r"/sources/", Sources),
 	(r"/source/([a-zA-Z0-9]{32})/", Source, dict(_id=None)),
-	(r"/submission/([a-zA-Z0-9]{32})/media/(low|med|high|thumb)/", MediaHandler, dict(_id=None, resolution=None)),
+	(r"/submission/([a-zA-Z0-9]{32})/media/(low|med|high|thumb|orig)/", MediaHandler, dict(_id=None, resolution=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/j3m/", J3MHandler, dict(_id=None)),
 	(r"/ictd/", GenerateICTD)
 ]

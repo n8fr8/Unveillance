@@ -31,13 +31,16 @@ class Submission(Asset):
 	def setMimeType(self, mime_type):
 		self.mime_type = mime_type
 		self.save()
-			
-	def importAssets(self, file_name):		
-		sys.path.insert(0, os.path.join(scripts_home['python'], "InformaCamUtils"))
+	
+	def j3mify(self, on_reindex=False):
 		from InformaCamUtils.j3mifier import J3Mifier
 
 		j3m_thread = J3Mifier(self)
 		j3m_thread.start()
 		j3m_thread.join()
 		
+	def importAssets(self, file_name):		
+		#sys.path.insert(0, os.path.join(scripts_home['python'], "InformaCamUtils"))
+		
+		self.j3mify()
 		return True

@@ -38,7 +38,7 @@ class Elasticsearch():
 			print res['ok']
 			return res['ok']
 		except KeyError as e:
-			print e
+			print r.text
 			return False
 			
 	def update(self, asset):
