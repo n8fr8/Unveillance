@@ -1,9 +1,10 @@
-import gnupg, sys, subprocess, copy, os, signal, fcntl, re
+import gnupg, sys, subprocess, copy, os, signal, fcntl, re, json
 from time import sleep, time
 from multiprocessing import Process
 from math import fabs
+import xml.etree.ElementTree as ET
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root
+from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root, forms, forms_root
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch, reindex
@@ -101,6 +102,79 @@ def initFiles():
 	from conf import j3m
 	subprocess.Popen(["chmod", "+x", "%sj3mparser.out" % j3m['root']])
 
+def initForms():
+	jr_sentinel = "jr:itext('"
+	parse = {"forms" : []}
+
+	for form in forms:
+		xmldoc = ET.parse(form)
+		root = xmldoc.getroot()
+		translation = None
+	
+		mapping = {
+			"mapping" : [],
+			"audio_form_data" : []
+		}
+	
+		# actual text mapping for objects is in the head (root[0]) at head.model.itext.translation
+		for el in root[0][1]:
+			if re.match(r'{.*}itext', el.tag):
+				translation = el[0]
+	
+		# bindings are described in body (root[1]) at body
+		for model_item in root[1]:
+			map = None
+			# if tag is select, select1, or upload
+			if re.match(r'{.*}(select|select1)', model_item.tag):
+				# get the binding by drilling down
+				map = {}
+				tag = model_item.attrib['bind']
+				bindings = []
+				for mi in model_item:
+					if re.match(r'{.*}item', mi.tag):
+						key = None
+						value = None
+						for kvp in mi:
+							if re.match(r'{.*}label', kvp.tag):
+								key = kvp.attrib['ref'][len(jr_sentinel):-2]
+							elif re.match(r'{.*}value', kvp.tag):
+								value = kvp.text
+								for t in translation:
+									if key == t.attrib['id']:
+										key = t[0].text
+										break
+
+						if key is not None and value is not None:
+							bindings.append({ value : key })
+				map[tag] = bindings
+					
+			elif re.match(r'{.*}upload', model_item.tag):
+				mapping['audio_form_data'].append(model_item.attrib['bind'])
+		
+			if map is not None:
+				mapping['mapping'].append(map)
+
+		if len(mapping['mapping']) == 0:
+			del mapping['mapping']
+	
+		if len(mapping['audio_form_data']) == 0:
+			del mapping['audio_form_data']
+			
+		if len(mapping.keys()) != 0:
+			# get the namespace for this form from head (root[0]) head.title
+			for el in root[0]:
+				if re.match(r'{.*}title', el.tag):
+					mapping['namespace'] = el.text
+					break
+		
+			parse['forms'].append(mapping)
+			print mapping
+	
+	print parse
+	m = open(os.path.join(forms_root, "forms.json"), 'wb+')
+	m.write(json.dumps(parse))
+	m.close()
+
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
 	
@@ -134,7 +208,6 @@ def watchHandler(sigint, frame):
 	global time_since_last_fired
 	print fabs(time_since_last_fired - time())
 	time_since_last_fired = time()
-	
 
 def startIntake():
 	daemonize(files['daemon']['log'],files['daemon']['pid'])
@@ -229,8 +302,17 @@ if __name__ == "__main__":
 		print "Goodbye!\n\n"
 		sys.exit(0)
 	elif mode == 4:
+		'''
 		print "Reindexing Unveillance Data\n"
 		reindex()
+		sleep(2)
+		'''
+		
+		print "Reevaluating forms\n"
+		initForms()
+		sleep(2)
+		
+		print "Done.\n"
 		sys.exit(0)
 		
 	print "Starting up your database..."
@@ -283,6 +365,10 @@ if __name__ == "__main__":
 		
 		print "Processing files..."
 		initFiles()
+		sleep(2)
+		
+		print "Evaluating forms..."
+		initForms()
 		sleep(2)
 		
 		print "Getting Keys..."
