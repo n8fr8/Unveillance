@@ -5,13 +5,14 @@
 public_user = "some_user_name"
 main_dir = "where_is_unveillance_installed"
 conf = "%sconf/" % main_dir
-log_root = "%slog/" % main_dir
+log_root = "%slogs/" % main_dir
+assets_root = "%ssubmissions/" % main_dir
 gnupg_home = "/full/path/to/safe/dir/.gnupg/"
 forms_root = "%sforms/" % main_dir
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
 }
-elasticsearch_home = "/usr/share/elasticsearch/"
+elasticsearch_home = "%packages/elasticsearch/" % main_dir
 secret_key_path = "%sconf/privkey.asc" % main_dir
 gnupg_pwd = "%sconf/privkeypassword" % main_dir
 
@@ -102,7 +103,6 @@ repositories = [
 """
 	NOTHING ELSE TO CHANGE!  Don't worry about the rest of these values!
 """
-log_root = assets_root
 sync_sleep = 2	# minutes
 validity_buffer = {
 	'location' : (5 * 60 * 1000), # 5 minutes
