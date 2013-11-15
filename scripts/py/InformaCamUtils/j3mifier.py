@@ -326,7 +326,7 @@ class J3Mifier(threading.Thread):
 		if verified.fingerprint is None:
 			return False
 
-		j = open("%s.j3m" % self.input[:-4])
+		j = open("%s.j3m" % self.input[:-4], 'rb')
 		j3m_data = j.read()
 		j.close()
 
@@ -337,8 +337,42 @@ class J3Mifier(threading.Thread):
 
 		return False
 	
+	def compareHash(client_hash, server_hash):
+		if len(client_hash) != 32:
+			return False
+		
+		if client_hash == server_hash:
+			return True
+		
+		return False
+	
 	def verifyVisualContent(self):
 		print "verifying visual content"
+		j = open("%s.j3m" % self.input[:-4], 'rb')
+		supplied_hashes = json.loads(j.read())['genealogy']['hashes']
+		j.close()
+		
+		verify = ShellThreader([
+			"ffmpeg", "-y", "-i", self.input,
+			"-acodec", "copy", "-f", "md5", 
+			"%s.md5.txt" % self.input[:-4]
+		])
+		verify.start()
+		verify.join()
+		
+		md5 = open("%s.md5.txt" % self.input[:-4], 'rb')
+		verified_hash = md5.read().replace("MD5=", "")
+		md5.close()
+		
+		print "comparing supplied hash with %s" % verified_hash
+		
+		if type(supplied_hashes) is list:
+			for hash in supplied_hashes:
+				if self.compareHash(hash, verified_hash):
+					return True
+		else:
+			return self.compareHash(supplied_hashes, verified_hash)
+		
 		return False
 	
 	def evaluateCameraFingerprint(self, submission_id):

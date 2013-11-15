@@ -83,60 +83,61 @@ class J3M(Asset):
 			except KeyError as e:
 				pass
 		
-		'''
 		try:
-			for (i, a) in enumerate(data['data']['userAppendedData']):
-				for (idx, f) in enumerate(a['associatedForms']):						
-					for ad in f['answerData'].iteritems():
-						if ad in audio_form_data:
-							v = f['answerData'][ad]
-							
+			for udata in data['data']['userAppendedData']:
+				for aForms in udata['associatedForms']:
+					for idx, key in enumerate(aForms['answerData']):
+						if key in audio_form_data:
+							audio_data = aForms['answerData'][key]
 							audio_base = "%s_audio_%d" % (base, idx)
-							unb64 = open("%s.3gp.gzip" % audio_base, "wb+")
-							
+
+							zip = open("%s.3gp.gzip" % audio_base, 'wb+')
+							unb64 = None
 							try:
-								unb64.write(b64decode(v))
+								unb64 = b64decode(audio_data)
 							except TypeError as e:
 								try:
-									v += "=" * ((4 - len(v) % 4) % 4)
-									unb64.write(b64decode(v))
+									audio_data += "="  * ((4 - len(v) % 4) % 4)
+									unb64 = b64decode(audio_data)
 								except TypeError as e:
 									print e
-									unb64.close()
-									continue
+						
+							if unb64 is None:
+								zip.close()
+								continue
 							
-							unb64.close()
+							zip.write(unb64)
+							zip.close()
+						
 							m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 							try:
 								file_type = m.id_filename("%s.3gp.gzip" % audio_base)
 								print "FILE TYPE: %s" % file_type
 								m.close()
-								
+							
 								if file_type != mime_types['gzip']:
 									continue
 							except:
 								m.close()
 								continue
-							
-							# ungzip into audio file
-							audio = open("%s.3gp" % audio_base, 'wb+')
-							audio.write(unGzipAsset("%s.3gp.gzip" % audio_base))
-							
-							audio.close()
+						
+							_3gp = open("%s.3gp" % audio_base, 'wb+')
+							_3gp.write(unGzipAsset("%s.3gp.gzip" % audio_base))
+							_3gp.close()
+						
 							m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 							try:
 								file_type = m.id_filename("%s.3gp" % audio_base)
 								print "AUDIO TYPE: %s" % file_type
 								m.close()
-								
+							
 								if file_type != mime_types['3gp']:
 									continue
-								
+							
 							except:
 								m.close()
 								continue
-							
-							# append proper extension for mime type
+						
 							ffmpeg = ShellThreader([
 								"ffmpeg", "-y", "-i", "%s.3gp" % audio_base, 
 								"-vn", "-acodec", "mp2", "-ar", "22050", 
@@ -144,11 +145,10 @@ class J3M(Asset):
 							])
 							ffmpeg.start()
 							ffmpeg.join()
-							
-							f['answerData'][ad] = "%s.wav" % audio_base
+						
+							aForms['answerData'][key] = "%s.wav" % audio_base
 		except KeyError as e:
 			print e
 			pass
-		'''
-				
+			
 		return data
