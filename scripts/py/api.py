@@ -54,6 +54,7 @@ class Submissions(tornado.web.RequestHandler):
 				})
 		
 		el = Elasticsearch(river="j3m")
+		#el = Elasticsearch(river="j3m,submissions")
 		
 		if len(clauses) == 1:
 			q = el.query({"clauses" : clauses})

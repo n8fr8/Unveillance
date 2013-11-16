@@ -247,7 +247,7 @@ class Elasticsearch():
 					try:
 						if clause['field'] == "get_all":
 							query['query'] = match_all
-							if not clause['get_all'] and self.river == "j3m":
+							if not clause['get_all']:
 								print "WITH J3M FILTER!"
 								# just give me location, asset_path (for now...)
 								query['fields'] = ["data.exif.location", "asset_path"]
@@ -257,19 +257,19 @@ class Elasticsearch():
 						elif clause['field'] == "location":
 							c = {
 								"geo_distance" : {
-									"distance" : "%dmi" % clause['radius'],
+									"distance" : "%dmi" % clause['location']['radius'],
 									"data.exif.location" : [
-										clause['longitude'], 
-										clause['latitude']
+										clause['location']['longitude'], 
+										clause['location']['latitude']
 									]
 								}
 							}
-						elif clause['field'] == "source":
+						elif clause['field'] == "sourceID":
 							c = {
 								"bool": {
 									"must" : {
 										"term" : {
-											"genealogy.createdOnDevice" : clause['source']
+											"genealogy.createdOnDevice" : clause['sourceID']
 										}
 									}
 								}
@@ -316,7 +316,7 @@ class Elasticsearch():
 								}
 							}
 							print "PUSHING QUERY %s" % c
-							
+						
 						elif clause['field'] == "exif":
 							for k,v in clause.iteritems():
 								if k != "field":
