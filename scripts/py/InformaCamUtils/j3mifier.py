@@ -1,8 +1,8 @@
 import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
-from conf import gnupg_home, mime_types, j3m as j3m_root
-from conf import gnupg_pwd, scripts_home
+from conf import gnupg_home, mime_types, scripts_home, j3m as j3m_root
+from conf import gnupg_pword, scripts_home
 from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
 from InformaCamModels.j3m import J3M
@@ -151,9 +151,10 @@ class J3Mifier(threading.Thread):
 
 			if file_type == mime_types['pgp']:
 				print "ATTEMPTING TO DECRYPT BLOB"
-				pwd = open(gnupg_pwd, 'rb')
+				pwd = open(gnupg_pword, 'rb')
 				passphrase = pwd.read().strip()
 				pwd.close()
+				print "read pwd"
 
 				gpg_cmd = [
 					"gpg", "--no-tty", "--passphrase", passphrase,
@@ -337,7 +338,7 @@ class J3Mifier(threading.Thread):
 
 		return False
 	
-	def compareHash(client_hash, server_hash):
+	def compareHash(self, client_hash, server_hash):
 		if len(client_hash) != 32:
 			return False
 		

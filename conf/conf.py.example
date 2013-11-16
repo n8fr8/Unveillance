@@ -14,7 +14,7 @@ scripts_home = {
 }
 elasticsearch_home = "%packages/elasticsearch/" % main_dir
 secret_key_path = "%sconf/privkey.asc" % main_dir
-gnupg_pwd = "%sconf/privkeypassword" % main_dir
+gnupg_pword = "%sconf/privkeypassword" % main_dir
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16

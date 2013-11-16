@@ -88,7 +88,7 @@ class J3M(Asset):
 		f.close()
 		
 		try:
-			for udata in j3m['data']['userAppendedData']:
+			for udata in data['data']['userAppendedData']:
 				for aForms in udata['associatedForms']:
 					for f in form_manifest['forms']:
 						if f['namespace'] == aForms['namespace']:
@@ -96,11 +96,12 @@ class J3M(Asset):
 								for mapping in f['mapping']:
 									try:
 										group = mapping.keys()[0]
-										key = aForms['answerData'][group]
+										key = aForms['answerData'][group].split(" ")
 							
 										for m in mapping[group]:
-											if m.keys()[0] == key:
-												aForms['answerData'][group] = m[key]
+											if m.keys()[0] in key:
+												key[key.index(m.keys()[0])] = m[m.keys()[0]]
+										aForms['answerData'][group] = " ".join(key)
 									except KeyError as e:
 										print e
 										pass
