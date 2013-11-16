@@ -1,4 +1,4 @@
-import requests, copy, json, sys, os, re
+import requests, copy, json, sys, os, re, time, datetime
 
 class Elasticsearch():
 	def __init__(self, river=None):
@@ -264,7 +264,6 @@ class Elasticsearch():
 									]
 								}
 							}
-
 						elif clause['field'] == "source":
 							c = {
 								"bool": {
@@ -275,7 +274,6 @@ class Elasticsearch():
 									}
 								}
 							}
-							
 						elif clause['field'] == "alias":
 							c = {
 								"bool": {
@@ -285,21 +283,39 @@ class Elasticsearch():
 										}
 									}
 								}
-							}
-														
-						elif clause['field'] == "capuredOn":
-							day = datetime.date.fromtimestamp(clause['date']/1000)
-							gte = datetime.date(day.year, day.month, day.day - clause['lower'])
-							lte = datetime.date(day.year, day.month, day.day + clause['upper'])
-														
+							}							
+						elif clause['field'] == "capturedOn":
+							day = datetime.date.fromtimestamp(
+								clause['capturedOn']['date']/1000
+							)
+							
+							if clause['capturedOn']['upper'] == 0:
+								lte = datetime.date(day.year, day.month, day.day + 1)
+								gte = datetime.date(day.year, day.month, day.day)
+							else:
+								lte = datetime.date.fromtimestamp(
+									(
+										clause['capturedOn']['date'] +
+										clause['capturedOn']['upper']
+									)/1000
+								)
+								gte = datetime.date.fromtimestamp(
+									clause['capturedOn']['date']/1000
+								)
+		
 							c = {
-								"numeric_range": {
+								"range": {
 									"genealogy.dateCreated" : {
-										"gte" : format(time.mktime(gte.timetuple()) * 1000, '0.0f'),
-										"lte" : format(time.mktime(lte.timetuple()) * 1000, '0.0f')
+										"gte" : format(time.mktime(
+											gte.timetuple()) * 1000, '0.0f'
+										),
+										"lte" : format(time.mktime(
+											lte.timetuple()) * 1000, '0.0f'
+										)
 									}
 								}
 							}
+							print "PUSHING QUERY %s" % c
 							
 						elif clause['field'] == "exif":
 							for k,v in clause.iteritems():
@@ -400,6 +416,7 @@ class Elasticsearch():
 		for clause in clauses:
 			print clause.keys()[0]
 			if query['query'] is None:
+				print "so query['query'] is none"
 				if clause.keys()[0] == "bool":
 					query['query'] = clause['bool']['must']
 				elif clause.keys()[0] == "geo_distance":
@@ -408,10 +425,15 @@ class Elasticsearch():
 				elif clause.keys()[0] == "nested":
 					query['query'] = match_all
 					query['filters']['nested'] = clause['nested']
+				elif clause.keys()[0] == "range":
+					print "numeric range query!"
+					query['query'] = clause
 
 			elif o is not None:
+				print "caught here: elif o is not None"
 				query['filters'][o].append(clause)
 			else:
+				print "caught here: else"
 				query['filters'][clause.keys()[0]] = clause[clause.keys()[0]]
 		return query
 		

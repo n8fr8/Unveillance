@@ -207,6 +207,8 @@ def AsTrueValue(str_value):
 				vals.append(AsTrueValue(v_))
 
 			return vals
+		if str_value.startswith("{") and str_value.endswith("}"):
+			return json.loads(str_value)
 		if str_value == "0":
 			return int(0)
 		if str_value == "true":

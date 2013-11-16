@@ -1,4 +1,4 @@
-import signal, sys, copy
+import signal, sys, copy, urllib2
 from base64 import b64encode
 
 import tornado.ioloop
@@ -43,10 +43,8 @@ class Submissions(tornado.web.RequestHandler):
 		clauses = []
 		op = None
 		
-		print parseRequest(self.request.query)
-		for k,v in parseRequest(self.request.query).iteritems():
-			print k
-			print v
+		print urllib2.unquote(self.request.query)
+		for k,v in parseRequest(urllib2.unquote(self.request.query)).iteritems():
 			if k == "operator":
 				op = v
 			else:
