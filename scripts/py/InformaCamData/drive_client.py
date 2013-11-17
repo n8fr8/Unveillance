@@ -146,8 +146,7 @@ class DriveClient(InformaCamDataClient):
 		
 		return assets
 		
-	def isAbsorbed(self, date_created):	
-		print "%d <= %d ? %s" % (date_created, self.absorbedByInformaCam[self.mode], date_created <= self.absorbedByInformaCam[self.mode])	
+	def isAbsorbed(self, date_created):
 		if date_created <= self.absorbedByInformaCam[self.mode]:
 			return True
 			

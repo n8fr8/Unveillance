@@ -112,7 +112,6 @@ class ImportClient(InformaCamDataClient):
 		super(ImportClient, self).isAbsorbed(file)
 		
 		s = os.stat(file)
-		print "%d <= %d ? %s" % (s.st_ctime, self.absorbedByInformaCam[self.mode], s.st_ctime <= self.absorbedByInformaCam[self.mode])
 		if s.st_ctime <= self.absorbedByInformaCam[self.mode]:
 			return True
 		

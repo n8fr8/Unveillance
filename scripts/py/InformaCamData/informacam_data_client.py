@@ -129,7 +129,7 @@ class InformaCamDataClient():
 
 	def updateLog(self, log_path):
 		"""Updates our log with the time of the last pull"""
-		print "updating logs..."
+		print "updating %s logs..." % self.mode
 		
 		self.absorbedByInformaCam[self.mode] = self.last_update_for_mode
 
@@ -138,3 +138,4 @@ class InformaCamDataClient():
 		f.close()
 
 		print self.absorbedByInformaCam
+		print "*******************\n"
