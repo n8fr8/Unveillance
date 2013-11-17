@@ -178,7 +178,7 @@ def initForms():
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
 	
-	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f'], stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f', '-Des.max-open-files=true'], stdout=subprocess.PIPE, close_fds=True)
 	data = p.stdout.readline()
 
 	while data:
@@ -326,7 +326,7 @@ if __name__ == "__main__":
 			["mv", "%s%s" %(elasticsearch_home[:-1], el_suffix), elasticsearch_home],
 			["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
 		]
-		
+
 		for cmd in cmds:
 			el_install = ShellThreader(cmd)
 			el_install.start()
