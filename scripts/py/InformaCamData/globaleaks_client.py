@@ -2,17 +2,14 @@ import magic, os, json, sys, re, time
 from math import fabs
 
 from informacam_data_client import InformaCamDataClient
-from conf import globaleaks, scripts_home
-
-sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
-from funcs import ShellReader, ShellThreader
+from conf import globaleaks, assets_root, scripts_home
+from InformaCamUtils.funcs import ShellReader, ShellThreader
 
 class GlobaleaksClient(InformaCamDataClient):
 	def __init__(self, mode=None):
 		super(GlobaleaksClient, self).__init__(globaleaks['absorbed_log'], mode=mode)
 		
-		os.chdir("%sInformaCamData" % scripts_home['python'])
-	
+		
 	def sshToHost(self, function, extras=None):
 		args = [
 			"host=%s" % globaleaks['host'],
@@ -27,7 +24,7 @@ class GlobaleaksClient(InformaCamDataClient):
 		ssh_thread = ShellThreader([
 			"fab",
 			"-f",
-			os.path.join(os.getcwd(), "ssh_helper.py"),
+			os.path.join("%sInformaCamData" % scripts_home['python'], "ssh_helper.py"),
 			"%s:%s" % (function, ",".join(args))
 		])
 		
@@ -44,12 +41,12 @@ class GlobaleaksClient(InformaCamDataClient):
 				globaleaks['host'], 
 				globaleaks['user']
 			),
-			"local_dump=%s" % os.getcwd()
+			"local_dump=%stmp/" % assets_root
 		]).join()
 		
 		m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 		try:
-			mime_type = m.id_filename(os.path.join(os.getcwd(), fileId))
+			mime_type = m.id_filename(os.path.join("%stmp" % assets_root, fileId))
 			print "FILE MIME TYPE: %s" % mime_type
 		except:
 			print "error here getting mime type"
@@ -65,13 +62,13 @@ class GlobaleaksClient(InformaCamDataClient):
 		fileId = fileId.replace(" ", "")
 		super(GlobaleaksClient, self).validateMediaObject(fileId,returnType)
 		
-		input = os.path.join(os.getcwd(), fileId)
+		input = os.path.join("%stmp" % assets_root, fileId)
 		output = "%s.log" % input[:-3]
 				
 		ffmpeg_thread = ShellThreader([
 			"fab",
 			"-f",
-			os.path.join(os.getcwd(),"ffmpeg_helper.py"),
+			os.path.join("%sInformaCamData" % scripts_home['python'],"ffmpeg_helper.py"),
 			"getInfo:input=%s,output=%s" % (input, output)
 		])
 		ffmpeg_thread.start()
@@ -121,7 +118,7 @@ class GlobaleaksClient(InformaCamDataClient):
 		super(GlobaleaksClient, self).pullFile(file)
 		# already pulled.
 		
-		file = os.path.join(os.getcwd(), file)
+		file = os.path.join("%stmp" % assets_root, file)
 		f = open(file, 'rb')
 		content = f.read()
 		f.close()
@@ -131,7 +128,7 @@ class GlobaleaksClient(InformaCamDataClient):
 	def lockFile(self, file):
 		super(GlobaleaksClient, self).lockFile(file)
 		
-		file = os.path.join(os.getcwd(), file)
+		file = os.path.join("%stmp" % assets_root, file)
 		ShellReader(['rm', file])
 		
 	def listAssets(self, omit_absorbed=False):
