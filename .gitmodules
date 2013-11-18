@@ -1,18 +1,18 @@
 [submodule "packages/tornado"]
 	path = packages/tornado
-	url = git@github.com:facebook/tornado.git
+	url = https://github.com/facebook/tornado.git
 [submodule "packages/FFmpeg"]
 	path = packages/FFmpeg
-	url = git@github.com:FFmpeg/FFmpeg.git
+	url = https://github.com/FFmpeg/FFmpeg.git
 [submodule "packages/filemagic"]
 	path = packages/filemagic
-	url = git@github.com:aliles/filemagic.git
+	url = https://github.com/aliles/filemagic.git
 [submodule "packages/requests"]
 	path = packages/requests
-	url = git@github.com:kennethreitz/requests.git
+	url = https://github.com/kennethreitz/requests.git
 [submodule "packages/fabric"]
 	path = packages/fabric
-	url = git@github.com:fabric/fabric.git
+	url = https://github.com/fabric/fabric.git
 [submodule "packages/python-gnugp"]
 	path = packages/python-gnugp
-	url = git@github.com:isislovecruft/python-gnupg.git
+	url = https://github.com/isislovecruft/python-gnupg.git
