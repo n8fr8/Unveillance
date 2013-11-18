@@ -74,7 +74,7 @@ To install (no need to run after install-- it already does):
 To run:
 
         cd /scripts/py
-        sudo python unveillance.py run
+        sudo python unveillance.py start
 
 To stop:
 
