@@ -55,8 +55,9 @@ Authentication:
 Example gpg key setup instructions
 
 1) gpg --gen-key
-2) gpg --export-secret-keys --armor (key-email-you-provider in step #1) > conf/privkey.asc
-3) enter private key password into conf/privkeypassword file
+2) gpg --export-secret-keys --armor (key-email-you-provided in step #1) > conf/privkey.asc
+3) gpg --export --armor (key-email-you-provided in step #1) > conf/pubkey.asc
+4) enter private key password into conf/privkeypassword file
 
 For all these files:
 
