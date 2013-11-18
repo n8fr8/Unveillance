@@ -111,7 +111,7 @@ validity_buffer = {
 	'stale_data' : ((((60 * 1000) * 60) * 24) * 30) # 30 days
 }
 
-submissions_dump = "%ssubmissions/" % assets_root
+submissions_dump = "%ssubmissions/" % log_root
 
 api = {
 	'port' : 8080,
