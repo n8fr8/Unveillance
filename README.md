@@ -1,16 +1,12 @@
 #Unveillance Backend 1.0
 
-Setup:
-
-You should already have Java installed (OpenJRE 7 is what I like) and JAVA_HOME variable should be set in your environment settings.
-
 After cloning, run
 
     git submodule update --init --recursive
 
 Install dependencies (not included in packaging):
 
-    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof
+    sudo apt-get install openjdk-7-jre-headless gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof python-pip
     easy_install --upgrade google-api-python-client
     sudo pip install oauth2client
 	sudo pip install urllib3
