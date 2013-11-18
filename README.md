@@ -1,16 +1,15 @@
 #Unveillance Backend 1.0
 
-Setup:
+NOTE: You may try to to run the "setup.sh" script to complete most of the steps below automatically.
 
-You should already have Java installed (OpenJRE 7 is what I like) and JAVA_HOME variable should be set in your environment settings.
-
+******
 After cloning, run
 
     git submodule update --init --recursive
 
 Install dependencies (not included in packaging):
 
-    sudo apt-get install gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof
+    sudo apt-get install openjdk-7-jre-headless gcc build-essential yasm pkg-config libx264-dev python-dev python-setuptools lsof python-pip
     easy_install --upgrade google-api-python-client
     sudo pip install oauth2client
 	sudo pip install urllib3
@@ -56,6 +55,13 @@ Authentication:
 - A gpg password file is required to use your secret key.  You may place this wherever you want.
 - Your public key (which is shared to any user) can be placed wherever you want.
 
+Example gpg key setup instructions
+
+1) gpg --gen-key
+2) gpg --export-secret-keys --armor (key-email-you-provided in step #1) > conf/privkey.asc
+3) gpg --export --armor (key-email-you-provided in step #1) > conf/pubkey.asc
+4) enter private key password into conf/privkeypassword file
+
 For all these files:
 
 	chmod 0400 [file]
@@ -78,7 +84,7 @@ To install (no need to run after install-- it already does):
 To run:
 
         cd /scripts/py
-        sudo python unveillance.py run
+        sudo python unveillance.py start
 
 To stop:
 
