@@ -87,7 +87,6 @@ class ImportClient(InformaCamDataClient):
 		for root, dirs, files in os.walk(import_directory['asset_root']):
 			for file in files:
 				s = os.stat(os.path.join(os.getcwd(), file))
-				print type(new_time)
 				if s.st_ctime > self.last_update_for_mode:
 					self.last_update_for_mode = s.st_ctime
 				

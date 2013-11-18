@@ -38,7 +38,7 @@ class Asset():
 					
 					from conf import assets_root
 					f = open("%sreindex.txt" % assets_root, "a+")
-					f.write(self._id)
+					f.write("%s\n" % self._id)
 					f.close()
 					
 					print "SHIT:\n %s" % self.invalid

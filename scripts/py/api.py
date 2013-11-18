@@ -1,11 +1,11 @@
-import signal, sys, copy, urllib2
+import signal, sys, copy, urllib2, logging, os
 from base64 import b64encode
 
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from conf import scripts_home, mime_types, public, invalidate, submissions_dump, api as api_prefs
+from conf import scripts_home, mime_types, public, invalidate, submissions_dump, api as api_prefs, import_directory, log_root
 from InformaCamModels.source import Source as ICSource
 from InformaCamModels.submission import Submission as ICSubmission
 from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
@@ -234,6 +234,28 @@ class J3MHandler(tornado.web.RequestHandler):
 			}
 			self.finish(res.emit())
 
+class ImportHandler(tornado.web.RequestHandler):
+	def post(self):
+		logging.info("importing %s to %s" % (
+			self.request.files['file'][0]['filename'], 
+			import_directory['asset_root']
+		))
+		
+		try:
+			f = open(os.path.join(import_directory['asset_root'], self.request.files['file'][0]['filename']), 'wb+')
+			f.write(self.request.files['file'][0]['body'])
+			f.close()
+			self.finish({'ok':True})
+			return
+		except IOError as e:
+			logging.info(e)
+			pass
+			
+		self.finish({'ok':False})
+
+log_file = "%sapi_log.txt" % log_root
+log_format = "%(asctime)s %(message)s"
+
 routes = [
 	(r"/", Ping),
 	(r"/submissions/", Submissions),
@@ -242,13 +264,17 @@ routes = [
 	(r"/source/([a-zA-Z0-9]{32})/", Source, dict(_id=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/media/(low|med|high|thumb|orig)/", MediaHandler, dict(_id=None, resolution=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/j3m/", J3MHandler, dict(_id=None)),
-	(r"/ictd/", GenerateICTD)
+	(r"/ictd/", GenerateICTD),
+	(r"/import/", ImportHandler)
 ]
 
 api = tornado.web.Application(routes)
 signal.signal(signal.SIGINT, terminationHandler)
 
 if __name__ == "__main__":
+	logging.basicConfig(filename=log_file, format=log_format, level=logging.INFO)
+	logging.info("API Started.")
+	
 	ictd = copy.deepcopy(public)
 	ictd['publicKey'] = b64encode(gzipAsset(public['publicKey']))
 	for f, form in enumerate(public['forms']):
@@ -258,4 +284,4 @@ if __name__ == "__main__":
 	server.bind(api_prefs['port'])
 	server.start(api_prefs['num_processes'])
 	
-	tornado.ioloop.IOLoop.instance().start()	
+	tornado.ioloop.IOLoop.instance().start()
