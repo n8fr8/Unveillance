@@ -1,5 +1,8 @@
 #Unveillance Backend 1.0
 
+NOTE: You may try to to run the "setup.sh" script to complete most of the steps below automatically.
+
+******
 After cloning, run
 
     git submodule update --init --recursive
