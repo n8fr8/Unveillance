@@ -52,6 +52,12 @@ Authentication:
 - A gpg password file is required to use your secret key.  You may place this wherever you want.
 - Your public key (which is shared to any user) can be placed wherever you want.
 
+Example gpg key setup instructions
+
+1) gpg --gen-key
+2) gpg --export-secret-keys --armor (key-email-you-provider in step #1) > conf/privkey.asc
+3) enter private key password into conf/privkeypassword file
+
 For all these files:
 
 	chmod 0400 [file]
