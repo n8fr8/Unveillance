@@ -9,12 +9,14 @@ log_root = "%slogs/" % main_dir
 assets_root = "%ssubmissions/" % main_dir
 gnupg_home = "/full/path/to/safe/dir/.gnupg/"
 forms_root = "%sforms/" % main_dir
+audio_form_data = forms_root
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
 }
-elasticsearch_home = "%packages/elasticsearch/" % main_dir
+elasticsearch_home = "%spackages/elasticsearch/" % main_dir
 secret_key_path = "%sconf/privkey.asc" % main_dir
 gnupg_pword = "%sconf/privkeypassword" % main_dir
+gnupg_pwd = gnupg_pword
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
