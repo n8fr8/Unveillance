@@ -68,9 +68,9 @@ def initElasticsearch():
 	elasticsearch.createIndex(reindex=True)
 	
 def initFiles():
-	subprocess.Popen(["mkdir","%ssources" % log_root])
-	subprocess.Popen(["mkdir","%ssubmissions" % log_root])		
-	subprocess.Popen(["mkdir","%stmp" % log_root])
+	subprocess.Popen(["mkdir","%ssources" % assets_root])
+	subprocess.Popen(["mkdir","%ssubmissions" % assets_root])		
+	subprocess.Popen(["mkdir","%stmp" % assets_root])
 	subprocess.Popen(["touch","%sreindex.txt" % log_root])
 	
 	for file, vals in files.iteritems():
@@ -326,7 +326,7 @@ if __name__ == "__main__":
 			["mv", "%s%s" %(elasticsearch_home[:-1], el_suffix), elasticsearch_home],
 			["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
 		]
-
+		
 		for cmd in cmds:
 			el_install = ShellThreader(cmd)
 			el_install.start()
