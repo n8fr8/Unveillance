@@ -6,3 +6,4 @@ packages/j3m/conf/ubuntu.properties
 forms/*
 packages/elasticsearch*
 scripts/py/test.py
+logs/*

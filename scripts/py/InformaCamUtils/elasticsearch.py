@@ -1,4 +1,4 @@
-import requests, copy, json, sys, os, re, time, datetime
+import requests, copy, json, sys, os, re, time, datetime, hashlib
 
 class Elasticsearch():
 	def __init__(self, river=None):
@@ -106,6 +106,18 @@ class Elasticsearch():
 												"include_in_root" : True
 											}
 										}
+									}
+								}
+							},
+							"userAppendedData" : {
+								"type" : "nested",
+								"include_in_parent" : True,
+								"include_in_root" : True,
+								"properties" : {
+									"associatedForms" : {
+										"type" : "nested",
+										"include_in_parent" : True,
+										"include_in_root" : True
 									}
 								}
 							}
@@ -315,24 +327,35 @@ class Elasticsearch():
 									}
 								}
 							}
-							print "PUSHING QUERY %s" % c
-						
+							print "PUSHING QUERY %s" % c			
 						elif clause['field'] == "exif":
+							c = {
+								"bool": {
+									"must" : []
+								}
+							}
 							for k,v in clause.iteritems():
 								if k != "field":
-									c = {
-										"bool": {
-											"must" : {
-												"term" : {
-													"data.exif.%s" % k : v
-												}
-											}
+									c['bool']['must'].append({
+										"term" : {
+											"data.exif.%s" % k : v
 										}
+									})
+						elif clause['field'] == "broadcast":
+							c = copy.deepcopy(deep_drill)
+							c_ = {
+								"bool" : {
+									"must" : []
+								}
+							}
+							for k, v in clause['broadcast'].iteritems():
+								c_['bool']['must'].append({
+									"term" : {
+										"%s.%s" % (path_2, k) : v
 									}
-									clauses.append(c)	
-							continue	#???
-							
-						elif clause['field'] == "bssid":
+								})
+							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
+						elif clause['field'] == "bssid":							
 							bssid = hashlib.sha1(clause['bssid']).hexdigest()
 							path_3 = "%s.visibleWifiNetworks" % path_2
 							c = copy.deepcopy(deep_drill)
@@ -357,32 +380,6 @@ class Elasticsearch():
 							}
 							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
 							
-						elif clause['field'] == "bluetoothDeviceAddress":
-							c = copy.deepcopy(deep_drill)
-							c_ =  {
-								"bool" : {
-									"must" : {
-										"term" : {
-											"%s.bluetoothDeviceAddress" % path_2 : clause['bluetoothDeviceAddress']
-										}
-									}
-								}
-							}
-							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
-						
-						elif clause['field'] == "cellTowerId":
-							c = copy.deepcopy(deep_drill)
-							c_ =  {
-								"bool" : {
-									"must" : {
-										"term" : {
-											"%s.cellTowerId" % path_2 : clause['cellTowerId']
-										}
-									}
-								}
-							}
-							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
-							
 						elif clause['field'] == "public_hash":
 							if re.match(r'[a-zA-Z0-9]{40}', clause['public_hash']):
 								c = {
@@ -394,7 +391,9 @@ class Elasticsearch():
 										}
 									}
 								}
-								
+						
+						elif clasuse['field'] == "keyword":
+							continue	
 						if c is not None:
 							clauses.append(c)
 						
