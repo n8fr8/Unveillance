@@ -4,14 +4,19 @@
 	If you are filling out paths, please note and retain the trailing slash.
 """
 public_user = "some_user_name"
+
 main_dir = "/path/to/where/you/cloned/this/repository/"
-conf = "%sconf/" % main_dir
-log_root = "%slogs/" % main_dir
-assets_root = "%ssubmissions/" % main_dir
+assets_root = "/path/to/where/you/want/submissions/to/go/"
+import_root = "/path/to/where/imported/media/should/go/"
 gnupg_home = "/full/path/to/safe/dir/.gnupg/"
 
-secret_key_path = "%sconf/privkey.asc" % main_dir
-gnupg_pword = "%sconf/privkeypassword" % main_dir
+conf = "%sconf/" % main_dir
+log_root = "%slogs/" % main_dir
+
+secret_key_path = "%sprivkey.asc" % conf
+gnupg_pword = "%sprivkeypassword" % conf
+
+forms_root = "%sforms/" % main_dir
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
@@ -46,11 +51,6 @@ globaleaks = {
 	"absorbed_log" : "%sabsorbedByInformaCam_gl.txt" % log_root,
 	"absorbed_flag" : "absorbedByInformaCam",
 	"public_url" : "http://WHATEVER_PUBLIC_URL.onion"
-}
-
-import_directory = {
-	"asset_root" : "%ssubmissions/" % main_dir,
-	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % log_root
 }
 
 """
@@ -96,21 +96,28 @@ repositories = [
 """
 	NOTHING ELSE TO CHANGE!  Don't worry about the rest of these values!
 """
-forms_root = "%sforms/" % main_dir
 scripts_home = {
 	"python" : "%sscripts/py/" % main_dir
 }
+
 elasticsearch_home = "%spackages/elasticsearch/" % main_dir
+
 j3m = {
 	"root" : "%spackages/j3m/" % main_dir
 }
+
+import_directory = {
+	"asset_root" : import_root,
+	"absorbed_log" : "%sabsorbedByInformaCam_import.txt" % log_root
+}
+
 sync_sleep = 2	# minutes
 validity_buffer = {
 	'location' : (5 * 60 * 1000), # 5 minutes
 	'stale_data' : ((((60 * 1000) * 60) * 24) * 30) # 30 days
 }
 
-submissions_dump = "%ssubmissions/" % log_root
+submissions_dump = "%ssubmissions/" % assets_root
 
 api = {
 	'port' : 8080,
