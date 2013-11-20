@@ -1,30 +1,21 @@
 """
 	STATIC PATHS:
 	In this section, fill in all of these values with whatever makes sense to you.
+	If you are filling out paths, please note and retain the trailing slash.
 """
 public_user = "some_user_name"
-main_dir = "where_is_unveillance_installed"
+main_dir = "/path/to/where/you/cloned/this/repository/"
 conf = "%sconf/" % main_dir
 log_root = "%slogs/" % main_dir
 assets_root = "%ssubmissions/" % main_dir
 gnupg_home = "/full/path/to/safe/dir/.gnupg/"
-forms_root = "%sforms/" % main_dir
-audio_form_data = forms_root
-scripts_home = {
-	"python" : "%sscripts/py/" % main_dir
-}
-elasticsearch_home = "%spackages/elasticsearch/" % main_dir
+
 secret_key_path = "%sconf/privkey.asc" % main_dir
 gnupg_pword = "%sconf/privkeypassword" % main_dir
-gnupg_pwd = gnupg_pword
 
 file_salt = "WHAT WILL YOUR SALT BE?"
 anon_salt = "16 bytes of goodness"	# 16
 anon_iv = "16 bytes of goodness"	# 16
-
-j3m = {
-	"root" : "%spackages/j3m/" % main_dir
-}
 
 """
 	REPOSITORY SYNC:
@@ -105,6 +96,14 @@ repositories = [
 """
 	NOTHING ELSE TO CHANGE!  Don't worry about the rest of these values!
 """
+forms_root = "%sforms/" % main_dir
+scripts_home = {
+	"python" : "%sscripts/py/" % main_dir
+}
+elasticsearch_home = "%spackages/elasticsearch/" % main_dir
+j3m = {
+	"root" : "%spackages/j3m/" % main_dir
+}
 sync_sleep = 2	# minutes
 validity_buffer = {
 	'location' : (5 * 60 * 1000), # 5 minutes
