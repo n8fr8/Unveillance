@@ -327,6 +327,7 @@ if __name__ == "__main__":
 			["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
 		]
 		
+
 		for cmd in cmds:
 			el_install = ShellThreader(cmd)
 			el_install.start()

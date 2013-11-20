@@ -79,15 +79,15 @@ To install (no need to run after install-- it already does):
 		
 		cd /scripts/py/
 		ln -s ../../conf/conf.py .
-        sudo python unveillance.py install
+        python unveillance.py install
 
 To run:
 
         cd /scripts/py
-        sudo python unveillance.py start
+        python unveillance.py start
 
 To stop:
 
         cd /scripts/py
-        sudo python unveillance.py stop
+        python unveillance.py stop
 
