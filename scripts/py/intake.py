@@ -8,42 +8,54 @@ from InformaCamModels.submission import Submission
 from conf import sync, sync_sleep, j3m, scripts_home, assets_root
 
 def reindex():
-	assets = {'submissions':[], 'sources':[]}
-	
-	for mode in assets.keys():
-		for root_, dirs_, files_ in os.walk(os.path.join(assets_root, mode)):
-			for dir_ in dirs_:
-				if mode == "submissions":
-					a = Submission(_id=dir_)					
-					
-				elif mode == "sources":
-					a = Source(_id=dir_)
-
-				assets[mode].append(a.emit())
-		
-		print "num %s: %d" % (mode, len(assets[mode]))
-	
-	#reindex elasticsearch
+	from conf import mime_type_map
 	from InformaCamUtils.elasticsearch import Elasticsearch
+	
 	elasticsearch = Elasticsearch()
 	elasticsearch.createIndex(reindex=True)
 	
-	for mode, group in assets.iteritems():
-		for a in group:
-			if mode == "submissions":
-				try:
-					del a['j3m_id']
-				except KeyError as e:
-					pass
+	for mode in ["sources", "submissions"]:
+		for root_, dirs_, files_ in os.walk(os.path.join(assets_root, mode)):
+			for dir_ in dirs_:
+				for root, dirs, files in os.walk(
+					os.path.join(assets_root, mode, dir_)):
+					data = {
+						'_id' : dir_,
+						'asset_path' : os.path.join(assets_root, mode, dir_)
+					}
 					
-				s = Submission(inflate=a)
-				s.j3mify(on_reindex=True)
-				print s.emit()
-			elif mode == "sources":
-				s = Source(inflate=a)
-				print s.emit()
-			
-			print "\n"
+					for file in files:
+						if mode == "submissions":
+							if re.match(r'^(low_|med_|thumb_|high_)', file):
+								continue
+							else:
+								comps = file.split(".")
+								if len(comps) == 2 and re.match(r'(mkv|jpg)', comps[1]):
+									data['file_name'] = file
+									for mt, ext in mime_type_map.iteritems():
+										if ext == comps[1]:
+											data['mime_type'] = mt
+											break
+									break
+						elif mode == "sources":
+							if re.match(r'^(credentials|publicKey|baseImage_)', file):
+								continue
+							else:
+								data['file_name'] = file
+								break
+					
+					print data
+
+					try:
+						if mode == "submissions":
+							submission = Submission(inflate=data, reindex=True)
+							print submission.emit()
+						elif mode == "sources":
+							source = Source(inflate=data, reindex=True)
+					except exceptions.ConnectionError as e:
+						print e
+						sys.exit()
+				#break
 
 def watch(only_sources=False, only_submissions=False, only_imports=False):
 	"""For each subscribed repository, this class sends new media to our Data API.

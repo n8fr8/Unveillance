@@ -5,25 +5,28 @@ from conf import gnupg_home, assets_root, invalidate
 from InformaCamUtils.funcs import ShellReader
 
 class Source(Asset):
-	def __init__(self, inflate=None, _id=None):
+	def __init__(self, inflate=None, _id=None, reindex=False):
 		package_content = None
 		if _id is None:
 			if inflate is None:
 				return
-				
-			package_content = inflate['package_content']
-			del inflate['package_content']
+			
+			if not reindex:
+				package_content = inflate['package_content']
+				del inflate['package_content']
 				
 		super(Source, self).__init__(inflate=inflate, _id=_id, river="sources", extra_fields=['fingerprint', 'baseImage'])
 		
 		if hasattr(self, 'asset_path'):
 			pass
 		else:
-			super(Source, self).makeDir(os.path.join("%ssources" % assets_root, self._id))
+			if not reindex:
+				super(Source, self).makeDir(os.path.join("%ssources" % assets_root, self._id))
 			
 		if package_content is not None:
-			if self.addFile(self.file_name, package_content):
-				self.importAssets(self.file_name)
+			if not reindex:
+				if self.addFile(self.file_name, package_content):
+					self.importAssets(self.file_name)
 				
 	
 	def importAssets(self, asset_name):

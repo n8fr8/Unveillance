@@ -147,12 +147,16 @@ class Elasticsearch():
 			r = requests.delete(self.el)
 			res = json.loads(r.text)
 			try:
-				if res['error'] == "IndexMissingException[[informacam] missing]":
+				if res['error'] == "IndexMissingException[[unveillance] missing]":
 					pass
 			except KeyError as e:
 				print r.text
 					
 		index = {
+			"settings" : {
+				"number_of_shards" : 8,
+				"number_of_replicas" : 4
+			},
 			"mappings" : mappings
 		}
 		r = requests.put(self.el, data=json.dumps(index))

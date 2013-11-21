@@ -13,14 +13,14 @@ resolutions = [
 ]
 
 class J3Mifier(threading.Thread):
-	def __init__(self, submission, on_reindex=False):
+	def __init__(self, submission, reindex=False):
 		threading.Thread.__init__(self)
 		
 		self.input = os.path.join(submission.asset_path, submission.file_name)
 		self.output = submission.asset_path
 		self.file_name = submission.file_name
 		self.submission = submission
-		self.on_reindex = on_reindex
+		self.on_reindex = reindex
 		
 	def run(self):
 		print "j3mifying %s" % self.submission.asset_path		

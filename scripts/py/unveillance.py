@@ -302,15 +302,13 @@ if __name__ == "__main__":
 		print "Goodbye!\n\n"
 		sys.exit(0)
 	elif mode == 4:
-		'''
-		print "Reindexing Unveillance Data\n"
-		reindex()
-		sleep(2)
-		'''
-		
 		print "Reevaluating forms\n"
 		initForms()
 		sleep(2)
+		
+		print "Reindexing Unveillance Data\n"
+		reindex()
+		sleep(2)		
 		
 		print "Done.\n"
 		sys.exit(0)
