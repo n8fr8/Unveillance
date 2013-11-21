@@ -315,25 +315,36 @@ if __name__ == "__main__":
 		
 	print "Starting up your database..."
 	if mode == 1:
-		el_suffix = "-0.90.6"
-		download = "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch%s.zip" % el_suffix
-		package_path = os.path.abspath(os.path.join(elasticsearch_home, os.pardir))
-		cmds = [
-			["wget", "-O", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix), download],
-			["unzip", "-d", package_path, "-o", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)],
-			["mv", "%s%s" %(elasticsearch_home[:-1], el_suffix), elasticsearch_home],
-			["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
-		]
+		try:
+			with open("%sbin/elasticsearch" % elasticsearch_home):
+				print "(elasticsearch already downloaded.  skipping download...)"
+				pass
+		except IOError as e:
+			el_suffix = "-0.90.6"
+			download = "https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch%s.zip" % el_suffix
+			package_path = os.path.abspath(os.path.join(elasticsearch_home, os.pardir))
+			cmds = [
+				["wget", "-O", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix), download],
+				["unzip", "-d", package_path, "-o", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)],
+				["mv", "%s%s" %(elasticsearch_home[:-1], el_suffix), elasticsearch_home],
+				["rm", "%s%s.zip" % (elasticsearch_home[:-1], el_suffix)]
+			]
+
+			for cmd in cmds:
+				el_install = ShellThreader(cmd)
+				el_install.start()
+				el_install.join()
 		
-		for cmd in cmds:
-			el_install = ShellThreader(cmd)
-			el_install.start()
-			el_install.join()
+		els_index = hashlib.md5("%s_%d" % (public_user, time())).hexdigest()
 		
 		els_config = open("%sels_config.yml" % log_root, 'wb+')
 		els_config.write("cluster.routing.allocation.awareness.attributes: u_zone\n")
-		els_config.write("node.u_zone: %s"  % hashlib.md5("%s_%d" % (public_user, time())).hexdigest())
+		els_config.write("node.u_zone: %s"  % els_index)
 		els_config.close()
+		
+		els_idx = open("%sels_index.txt" % log_root, 'wb+')
+		els_idx.write(els_index)
+		els_idx.close()
 			
 	print "please wait..."
 	

@@ -3,8 +3,12 @@ import requests, copy, json, sys, os, re, time, datetime, hashlib
 class Elasticsearch():
 	def __init__(self, river=None):
 		from InformaCamModels.asset import Asset
+		from conf import log_root
 		
-		self.el = "http://localhost:9200/unveillance/"
+		els_idx = open("%sels_index.txt" % log_root, 'rb')
+		self.el = "http://localhost:9200/%s/" % els_idx.read().strip()
+		els_idx.close()
+		
 		if river is not None:
 			self.river = river
 			

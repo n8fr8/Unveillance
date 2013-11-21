@@ -55,6 +55,8 @@ def reindex():
 					except exceptions.ConnectionError as e:
 						print e
 						sys.exit()
+					except AttributeError as e:
+						continue
 				#break
 
 def watch(only_sources=False, only_submissions=False, only_imports=False):
