@@ -1,4 +1,4 @@
-import gnupg, sys, subprocess, copy, os, signal, fcntl, re, json
+import gnupg, sys, subprocess, copy, os, signal, fcntl, re, json, hashlib
 from time import sleep, time
 from multiprocessing import Process
 from math import fabs
@@ -178,7 +178,7 @@ def initForms():
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
 	
-	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f', '-Des.max-open-files=true'], stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f', '-Des.max-open-files=true','-Des.config=%els.yml' % log_root], stdout=subprocess.PIPE, close_fds=True)
 	data = p.stdout.readline()
 
 	while data:
@@ -330,6 +330,11 @@ if __name__ == "__main__":
 			el_install = ShellThreader(cmd)
 			el_install.start()
 			el_install.join()
+		
+		els_config = open("%sels_config.yml" % log_root, 'wb+')
+		els_config.write("cluster.routing.allocation.awareness.attributes: u_zone\n")
+		els_config.write("node.u_zone: %s"  % hashlib.md5("%s_%d" % (public_user, time.time())).hexdigest())
+		els_config.close()
 			
 	print "please wait..."
 	
