@@ -24,19 +24,22 @@ class Source(Asset):
 				super(Source, self).makeDir(os.path.join("%ssources" % assets_root, self._id))
 			
 		if package_content is not None:
-			if not reindex:
-				if self.addFile(self.file_name, package_content):
-					self.importAssets(self.file_name)
+			if self.addFile(self.file_name, package_content):
+				self.importAssets(self.file_name)
+		else:
+			if reindex:
+				self.importAssets(self.file_name, reindex=True)
 				
 	
-	def importAssets(self, asset_name):
-
-		ShellReader([
-			"unzip", 
-			"%s/%s" % (self.asset_path, asset_name), 
-			"-d", 
-			self.asset_path
-		])
+	def importAssets(self, asset_name, reindex=False):
+		if not reindex:
+			ShellReader([
+				"unzip", 
+				"%s/%s" % (self.asset_path, asset_name), 
+				"-d", 
+				self.asset_path
+			])
+		
 		self.importKey(os.path.join(self.asset_path, "publicKey"))
 		
 		# all the base images
