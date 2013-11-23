@@ -128,6 +128,7 @@ class DriveClient(InformaCamDataClient):
 
 		files = self.service.children().list(folderId=drive['asset_root']).execute()
 		for f in files['items']:
+			f = self.getFile(f['id'])
 			# google is 5 hours ahead of Eastern btw
 			time_delta = datetime.timedelta(hours=-5)
 			
