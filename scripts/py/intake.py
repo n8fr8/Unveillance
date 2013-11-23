@@ -74,7 +74,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 	print "running watch... (mode=%s)" % mode
 	
 	for sync_type in sync:
-		if sync_type == "drive":
+		if sync_type == "google_drive":
 			if not only_imports:
 				from InformaCamData.drive_client import DriveClient	
 				clients.append(DriveClient(mode=mode))
