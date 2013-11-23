@@ -146,5 +146,5 @@ class InformaCamDataClient():
 		except IOError as e:
 			num_tries += 1
 			time.sleep(2)
-			self.updateLog(log_path, num_tries)
+			self.updateLog(log_path, num_tries=num_tries)
 			
