@@ -127,15 +127,24 @@ class InformaCamDataClient():
 		
 		return m.hexdigest()
 
-	def updateLog(self, log_path):
+	def updateLog(self, log_path, num_tries=0):
+		if num_tries >= 10:
+			return
+			
 		"""Updates our log with the time of the last pull"""
 		print "updating %s logs..." % self.mode
 		
 		self.absorbedByInformaCam[self.mode] = self.last_update_for_mode
+		
+		try:
+			f = open(log_path, 'wb+')
+			f.write(json.dumps(self.absorbedByInformaCam))
+			f.close()
 
-		f = open(log_path, 'wb+')
-		f.write(json.dumps(self.absorbedByInformaCam))
-		f.close()
-
-		print self.absorbedByInformaCam
-		print "*******************\n"
+			print self.absorbedByInformaCam
+			print "*******************\n"
+		except IOError as e:
+			num_tries += 1
+			time.sleep(2)
+			self.updateLog(log_path, num_tries)
+			

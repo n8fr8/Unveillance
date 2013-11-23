@@ -5,7 +5,7 @@ class Elasticsearch():
 		from InformaCamModels.asset import Asset
 		from conf import log_root
 		
-		els_idx = open("%sels_index.txt" % log_root, 'rb')
+		els_idx = open(os.path.join(log_root, "els_index.txt"), 'rb')
 		self.el = "http://localhost:9200/%s/" % els_idx.read().strip()
 		els_idx.close()
 		

@@ -345,6 +345,16 @@ if __name__ == "__main__":
 		els_idx = open("%sels_index.txt" % log_root, 'wb+')
 		els_idx.write(els_index)
 		els_idx.close()
+		
+		cmds = [
+			["chmod", "0400", "%sels_index.txt" % log_root],
+			["chmod", "0400", "%sels_config.yml" % log_root]
+		]
+		
+		for cmd in cmds:
+			els_cmd = ShellThreader(cmd)
+			els_cmd.start()
+			els_cmd.join()
 			
 	print "please wait..."
 	

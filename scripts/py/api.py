@@ -1,4 +1,4 @@
-import signal, sys, copy, urllib2, logging, os
+import signal, sys, copy, urllib2, logging, os, json
 from base64 import b64encode
 
 import tornado.ioloop
@@ -23,11 +23,7 @@ class Res():
 
 class GenerateICTD(tornado.web.RequestHandler):
 	def get(self):
-		res = Res()
-		res.result = 200
-		res.data = ictd
-		
-		self.finish(res.emit())
+		self.finish(json.dumps(ictd))
 
 class Ping(tornado.web.RequestHandler):
 	def get(self):
