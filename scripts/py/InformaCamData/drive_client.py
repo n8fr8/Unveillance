@@ -88,12 +88,17 @@ class DriveClient(InformaCamDataClient):
 		
 		assets = []
 		new_time = 0
+		files = None
 		
 		'''
 		get all sharedToMe
 		'''
 		q = {'q' : 'sharedWithMe'}
-		files = self.service.files().list(**q).execute()
+		try:
+			files = self.service.files().list(**q).execute()
+		except errors.HttpError as e:
+			return False
+			
 		for f in files['items']:
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
 					
@@ -125,8 +130,12 @@ class DriveClient(InformaCamDataClient):
 				except errors.HttpError as e:
 					print e
 					continue
-
-		files = self.service.children().list(folderId=drive['asset_root']).execute()
+		
+		try:
+			files = self.service.children().list(folderId=drive['asset_root']).execute()
+		except errors.HttpError as e:
+			return False
+			
 		for f in files['items']:
 			f = self.getFile(f['id'])
 			# google is 5 hours ahead of Eastern btw
