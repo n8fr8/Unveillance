@@ -59,6 +59,7 @@ class J3M(Asset):
 			loc = data['data']['exif']['location']
 			data['data']['exif']['location'] = [loc[1], loc[0]]
 		except KeyError as e:
+			print e
 			pass
 		
 		try:
@@ -70,7 +71,18 @@ class J3M(Asset):
 		for playback in data['data']['sensorCapture']:
 			try:
 				gps = str(playback['sensorPlayback']['gps_coords'])[1:-1].split(",")
+				#print "sensorPlayback.gps_coords %s" % gps 
 				playback['sensorPlayback']['gps_coords'] = [
+					float(gps[1]),
+					float(gps[0])
+				]
+			except KeyError as e:
+				pass
+			
+			try:
+				gps = str(playback['sensorPlayback']['regionLocationData']['gps_coords'])[1:-1].split(",")
+				#print "sensorPlayback.regionLocationData.gps_coords %s" % gps 
+				playback['sensorPlayback']['regionLocationData']['gps_coords'] = [
 					float(gps[1]),
 					float(gps[0])
 				]
