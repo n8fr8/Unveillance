@@ -118,6 +118,7 @@ validity_buffer = {
 }
 
 submissions_dump = "%ssubmissions/" % assets_root
+conf_root = conf
 
 api = {
 	'port' : 8080,
