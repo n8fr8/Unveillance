@@ -339,7 +339,8 @@ if __name__ == "__main__":
 		
 		els_config = open("%sels_config.yml" % log_root, 'wb+')
 		els_config.write("cluster.routing.allocation.awareness.attributes: u_zone\n")
-		els_config.write("node.u_zone: %s"  % els_index)
+		els_config.write("node.u_zone: %s\n"  % els_index)
+		els_config.write("node.local: true")
 		els_config.close()
 		
 		els_idx = open("%sels_index.txt" % log_root, 'wb+')
