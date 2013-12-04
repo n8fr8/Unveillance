@@ -4,7 +4,7 @@ from multiprocessing import Process
 from math import fabs
 import xml.etree.ElementTree as ET
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root, forms, forms_root
+from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root, forms, forms_root, conf_root
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch, reindex
@@ -178,7 +178,7 @@ def initForms():
 def startElasticsearch():
 	daemonize(files['elasticsearch']['log'], files['elasticsearch']['pid'])
 	
-	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f', '-Des.max-open-files=true','-Des.config=%sels_config.yml' % log_root], stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen(['%sbin/elasticsearch' % elasticsearch_home, '-f', '-Des.max-open-files=true','-Des.config=%sels_config.yml' % conf_root], stdout=subprocess.PIPE, close_fds=True)
 	data = p.stdout.readline()
 
 	while data:
@@ -334,29 +334,7 @@ if __name__ == "__main__":
 				el_install = ShellThreader(cmd)
 				el_install.start()
 				el_install.join()
-		
-		els_index = hashlib.md5("%s_%d" % (public_user, time())).hexdigest()
-		
-		els_config = open("%sels_config.yml" % log_root, 'wb+')
-		els_config.write("cluster.routing.allocation.awareness.attributes: u_zone\n")
-		els_config.write("node.u_zone: %s\n"  % els_index)
-		els_config.write("node.local: true")
-		els_config.close()
-		
-		els_idx = open("%sels_index.txt" % log_root, 'wb+')
-		els_idx.write(els_index)
-		els_idx.close()
-		
-		cmds = [
-			["chmod", "0400", "%sels_index.txt" % log_root],
-			["chmod", "0400", "%sels_config.yml" % log_root]
-		]
-		
-		for cmd in cmds:
-			els_cmd = ShellThreader(cmd)
-			els_cmd.start()
-			els_cmd.join()
-			
+				
 	print "please wait..."
 	
 	p = Process(target=startElasticsearch)
@@ -410,4 +388,3 @@ if __name__ == "__main__":
 	print "done.\n"
 	
 	print "Welcome to Unveillance.\n\n"
-

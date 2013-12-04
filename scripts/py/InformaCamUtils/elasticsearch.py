@@ -3,11 +3,8 @@ import requests, copy, json, sys, os, re, time, datetime, hashlib
 class Elasticsearch():
 	def __init__(self, river=None):
 		from InformaCamModels.asset import Asset
-		from conf import log_root
 		
-		els_idx = open(os.path.join(log_root, "els_index.txt"), 'rb')
-		self.el = "http://localhost:9200/%s/" % els_idx.read().strip()
-		els_idx.close()
+		self.el = "http://localhost:9200/unveillance/"
 		
 		if river is not None:
 			self.river = river
@@ -439,4 +436,3 @@ class Elasticsearch():
 				print "caught here: else"
 				query['filters'][clause.keys()[0]] = clause[clause.keys()[0]]
 		return query
-		
