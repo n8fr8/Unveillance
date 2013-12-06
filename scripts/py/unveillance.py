@@ -99,23 +99,28 @@ def initFiles():
 	from conf import drive
 	subprocess.Popen(["touch", drive['absorbed_log']])
 	
-	old_dir = os.getcwd()
-	
 	from conf import j3m
-	os.chdir(os.path.join(j3m['root'],"jpeg-redaction","lib"))
-	p = subprocess.Popen(["make"])
-	p.wait()
+	try:
+		with open(os.path.join(j3m['root'], "j3mparser.out")):
+			print "(j3m parser already compiled.  skipping make...)"
+			pass
+	except IOError as e:
+		old_dir = os.getcwd()
+		os.chdir(os.path.join(j3m['root'],"jpeg-redaction","lib"))
+		
+		p = subprocess.Popen(["make"])
+		p.wait()
 	
-	p = subrocess.Popen([
-		"g++", "-L", os.path.join(j3m['root'], "jpeg-redaction","lib"),
-		"-lredact", "jpeg.cpp", "jpeg_decoder.cpp", "jpeg_marker.cpp", "debug_flag.cpp",
-		"byte_swapping.cpp", "iptc.cpp", "tiff_ifd.cpp", "tiff_tag.cpp", 
-		"j3mparser.cpp", "-o", "../../j3mparser.out"
-	])
-	p.wait()
+		p = subrocess.Popen([
+			"g++", "-L", os.path.join(j3m['root'], "jpeg-redaction","lib"),
+			"-lredact", "jpeg.cpp", "jpeg_decoder.cpp", 
+			"jpeg_marker.cpp", "debug_flag.cpp", "byte_swapping.cpp", 
+			"iptc.cpp", "tiff_ifd.cpp", "tiff_tag.cpp", 
+			"j3mparser.cpp", "-o", "../../j3mparser.out"
+		])
+		p.wait()
 	
-	os.chdir(old_dir)
-	#subprocess.Popen(["chmod", "+x", "%sj3mparser.out" % j3m['root']])
+		os.chdir(old_dir)
 
 def initForms():
 	jr_sentinel = "jr:itext('"
