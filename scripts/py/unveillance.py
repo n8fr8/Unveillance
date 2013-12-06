@@ -111,7 +111,7 @@ def initFiles():
 		p = subprocess.Popen(["make"])
 		p.wait()
 	
-		p = subrocess.Popen([
+		p = subprocess.Popen([
 			"g++", "-L", os.path.join(j3m['root'], "jpeg-redaction","lib"),
 			"-lredact", "jpeg.cpp", "jpeg_decoder.cpp", 
 			"jpeg_marker.cpp", "debug_flag.cpp", "byte_swapping.cpp", 
@@ -282,14 +282,21 @@ if __name__ == "__main__":
 		print "Stopping Unveillance\n"
 		
 		for file, vals in files.iteritems():
-			f = open(vals['pid'], 'r')
+			current_pid = False
+			
 			try:
-				current_pid = int(f.read().strip())
-			except ValueError as e:
-				print "No pid for %s" % file
-				continue
+				f = open(vals['pid'], 'r')
+				
+				try:
+					current_pid = int(f.read().strip())
+				except ValueError as e:
+					print "No pid for %s" % file
+					continue
 
-			f.close()
+				f.close()
+			except IOError as e:
+				print "no such PID file yet"
+				pass
 			
 			print "shutting down %s..." % file
 			try:
