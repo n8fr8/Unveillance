@@ -101,95 +101,95 @@ class J3M(Asset):
 			f.close()
 		
 			try:
-			for udata in data['data']['userAppendedData']:
-				for aForms in udata['associatedForms']:
-					for f in form_manifest['forms']:
-						if f['namespace'] == aForms['namespace']:
-							try:
-								for mapping in f['mapping']:
-									try:
-										group = mapping.keys()[0]
-										key = aForms['answerData'][group].split(" ")
-							
-										for m in mapping[group]:
-											if m.keys()[0] in key:
-												key[key.index(m.keys()[0])] = m[m.keys()[0]]
-										aForms['answerData'][group] = " ".join(key)
-									except KeyError as e:
-										print e
-										pass
-							except KeyError as e:
-								pass
-						
-							try:
-								idx = 0
-								for audio in f['audio_form_data']:
-									try:
-										audio_data = aForms['answerData'][audio]
-										audio_base = "%s_audio_%d" % (base, idx)
-										idx += 1
-
-										zip = open("%s.3gp.gzip" % audio_base, 'wb+')
-										unb64 = None
+				for udata in data['data']['userAppendedData']:
+					for aForms in udata['associatedForms']:
+						for f in form_manifest['forms']:
+							if f['namespace'] == aForms['namespace']:
+								try:
+									for mapping in f['mapping']:
 										try:
-											unb64 = b64decode(audio_data)
-										except TypeError as e:
+											group = mapping.keys()[0]
+											key = aForms['answerData'][group].split(" ")
+							
+											for m in mapping[group]:
+												if m.keys()[0] in key:
+													key[key.index(m.keys()[0])] = m[m.keys()[0]]
+											aForms['answerData'][group] = " ".join(key)
+										except KeyError as e:
+											print e
+											pass
+								except KeyError as e:
+									pass
+						
+								try:
+									idx = 0
+									for audio in f['audio_form_data']:
+										try:
+											audio_data = aForms['answerData'][audio]
+											audio_base = "%s_audio_%d" % (base, idx)
+											idx += 1
+
+											zip = open("%s.3gp.gzip" % audio_base, 'wb+')
+											unb64 = None
 											try:
-												audio_data += "="  * ((4 - len(v) % 4) % 4)
 												unb64 = b64decode(audio_data)
 											except TypeError as e:
-												print e
+												try:
+													audio_data += "="  * ((4 - len(v) % 4) % 4)
+													unb64 = b64decode(audio_data)
+												except TypeError as e:
+													print e
 						
-										if unb64 is None:
+											if unb64 is None:
+												zip.close()
+												continue
+							
+											zip.write(unb64)
 											zip.close()
-											continue
-							
-										zip.write(unb64)
-										zip.close()
 						
-										m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
-										try:
-											file_type = m.id_filename("%s.3gp.gzip" % audio_base)
-											print "FILE TYPE: %s" % file_type
-											m.close()
+											m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
+											try:
+												file_type = m.id_filename("%s.3gp.gzip" % audio_base)
+												print "FILE TYPE: %s" % file_type
+												m.close()
 							
-											if file_type != mime_types['gzip']:
+												if file_type != mime_types['gzip']:
+													continue
+											except:
+												m.close()
 												continue
-										except:
-											m.close()
-											continue
 						
-										_3gp = open("%s.3gp" % audio_base, 'wb+')
-										_3gp.write(unGzipAsset("%s.3gp.gzip" % audio_base))
-										_3gp.close()
+											_3gp = open("%s.3gp" % audio_base, 'wb+')
+											_3gp.write(unGzipAsset("%s.3gp.gzip" % audio_base))
+											_3gp.close()
 						
-										m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
-										try:
-											file_type = m.id_filename("%s.3gp" % audio_base)
-											print "AUDIO TYPE: %s" % file_type
-											m.close()
+											m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
+											try:
+												file_type = m.id_filename("%s.3gp" % audio_base)
+												print "AUDIO TYPE: %s" % file_type
+												m.close()
 							
-											if file_type != mime_types['3gp']:
+												if file_type != mime_types['3gp']:
+													continue
+							
+											except:
+												m.close()
 												continue
-							
-										except:
-											m.close()
-											continue
 						
-										ffmpeg = ShellThreader([
-											"ffmpeg", "-y", "-i", "%s.3gp" % audio_base, 
-											"-vn", "-acodec", "mp2", "-ar", "22050", 
-											"-f", "wav", "%s.wav" % audio_base
-										])
-										ffmpeg.start()
-										ffmpeg.join()
+											ffmpeg = ShellThreader([
+												"ffmpeg", "-y", "-i", "%s.3gp" % audio_base, 
+												"-vn", "-acodec", "mp2", "-ar", "22050", 
+												"-f", "wav", "%s.wav" % audio_base
+											])
+											ffmpeg.start()
+											ffmpeg.join()
 						
-										aForms['answerData'][audio] = "%s.wav" % audio_base
-									except KeyError as e:
-										print e
-										pass
-							except KeyError as e:
-								pass
+											aForms['answerData'][audio] = "%s.wav" % audio_base
+										except KeyError as e:
+											print e
+											pass
+								except KeyError as e:
+									pass
 			except KeyError as e:
 				print e
 				pass
