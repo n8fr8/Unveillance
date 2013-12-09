@@ -119,7 +119,8 @@ class Sources(tornado.web.RequestHandler):
 		clauses = []
 		op = None
 		
-		for k,v in parseRequest(self.request.query).iteritems():
+		print urllib2.unquote(self.request.query)
+		for k,v in parseRequest(urllib2.unquote(self.request.query)).iteritems():
 			if k == "operator":
 				op = v
 			else:

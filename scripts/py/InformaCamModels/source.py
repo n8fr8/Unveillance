@@ -68,17 +68,37 @@ class Source(Asset):
 		return True
 	
 	def importKey(self, path_to_key):
+		print path_to_key
 		gpg = gnupg.GPG(homedir=gnupg_home)
 		
 		key = open(path_to_key)
-		import_result = gpg.import_keys(key.read())
+		key_data = key.read()
 		key.close()
-				
-		fingerprint = import_result.results[0]['fingerprint']
+		
+		import_result = gpg.import_keys(key_data)
+		
+		packet_res = gpg.list_packets(key_data).data.split("\n")
+		for line in packet_res:
+			if re.match(r'^:signature packet:', line):
+				key_id = line[-16:]
+				print key_id
+				break
+
+		key_result = [key for key in gpg.list_keys() if key['keyid'] == key_id]
+		if len(key_result) != 1:
+			return False
+		else:
+			fingerprint = key_result[0]['fingerprint']
 
 		if fingerprint is not None:
 			self.fingerprint = fingerprint.lower()
+			print self.fingerprint
 			self.save()
+			
+			# get all submissions with this fingerprint
+			
+			# revalidate their j3ms
+			
 			return True
 		else:
 			self.invalidate(
