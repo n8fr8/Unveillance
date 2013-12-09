@@ -95,11 +95,12 @@ class J3M(Asset):
 			except KeyError as e:
 				pass
 		
-		f = open(os.path.join(forms_root, "forms.json"), 'rb')
-		form_manifest = json.loads(f.read())
-		f.close()
-		
 		try:
+			f = open(os.path.join(forms_root, "forms.json"), 'rb')
+			form_manifest = json.loads(f.read())
+			f.close()
+		
+			try:
 			for udata in data['data']['userAppendedData']:
 				for aForms in udata['associatedForms']:
 					for f in form_manifest['forms']:
@@ -189,7 +190,10 @@ class J3M(Asset):
 										pass
 							except KeyError as e:
 								pass
-		except KeyError as e:
+			except KeyError as e:
+				print e
+				pass
+		except IOError as e:
 			print e
 			pass
 			
