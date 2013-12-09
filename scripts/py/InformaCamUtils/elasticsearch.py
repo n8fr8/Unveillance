@@ -257,6 +257,7 @@ class Elasticsearch():
 			elif k == "clauses" and type(v) is list:
 				for clause in v:
 					c = None
+					
 					try:
 						if clause['field'] == "get_all":
 							query['query'] = match_all
@@ -379,8 +380,7 @@ class Elasticsearch():
 									}
 								}
 							}
-							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_
-							
+							c['nested']['query']['filtered']['filter']['nested']['query']['filtered']['filter'] = c_						
 						elif clause['field'] == "public_hash":
 							if re.match(r'[a-zA-Z0-9]{40}', clause['public_hash']):
 								c = {
@@ -391,14 +391,32 @@ class Elasticsearch():
 											}
 										}
 									}
+								}						
+						elif clause['field'] == "keyword":
+							continue
+						elif clause['field'] == "fingerprint":
+							if self.river == "sources":
+								term = {
+									"fingerprint" : clause['fingerprint']
 								}
+							else:
+								term = {
+									"genealogy.createdOnDevice" : clause['fingerprint']
+								}
+
+							c = {
+								"bool" : {
+									"must" : {
+										"term" : term
+									}
+								}
+							}	
 						
-						elif clasuse['field'] == "keyword":
-							continue	
 						if c is not None:
 							clauses.append(c)
 						
 					except KeyError as e:
+						print e
 						try:
 							if clause['clauses'] is not None:
 								clauses.append(self.buildQuery(clause, as_sub_query=True)['filters'])
