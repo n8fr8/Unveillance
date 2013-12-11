@@ -45,12 +45,27 @@ def verifyVisualContent(input):
 	j = open("%s.j3m" % input[:-4], 'rb')
 	supplied_hashes = json.loads(j.read())['genealogy']['hashes']
 	j.close()
-	
-	verify = ShellThreader([
-		"ffmpeg", "-y", "-i", input,
-		"-acodec", "copy", "-f", "md5", 
-		"%s.md5.txt" % input[:-4]
-	])
+
+	# ffmpeg -f image2 -i IMG_20131209_054750.jpg -vcodec copy -an -crf 32 -threads 1 -f md5 -
+	if input.endsWith("jpg"):
+		verify = ShellThreader([
+			"ffmpeg", 
+			"-f","image2", 
+			"-i", input,
+			"-vcodec","copy",
+			"-an", 
+			"-crf","32",
+			"-threads","1"
+			"-f", "md5", 
+			"%s.md5.txt" % input[:-4]
+		])
+	else:
+		verify = ShellThreader([
+			"ffmpeg", "-y", "-i", input,
+			"-acodec", "copy", "-f", "md5", 
+			"%s.md5.txt" % input[:-4]
+		])
+		
 	verify.start()
 	verify.join()
 	
