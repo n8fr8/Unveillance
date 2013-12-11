@@ -17,6 +17,7 @@ def verifySignature(input):
 	gpg = gnupg.GPG(homedir=gnupg_home)
 	verified = gpg.verify_file("%s.j3m" % input[:-4], sig_file="%s.j3m.sig" % input[:-4])
 
+	print "verified fingerprint: %s" % verified.fingerprint
 	if verified.fingerprint is None:
 		return False
 
@@ -25,6 +26,7 @@ def verifySignature(input):
 	j.close()
 
 	supplied_fingerprint = str(json.loads(j3m_data)['genealogy']['createdOnDevice'])
+	print "supplied fingerprint: %s" % supplied_fingerprint
 	if verified.fingerprint.upper() == supplied_fingerprint.upper():
 		print "Signature valid for %s" % verified.fingerprint.upper()
 		return True
@@ -40,14 +42,14 @@ def compareHash(client_hash, server_hash):
 	
 	return False
 
-def verifyVisualContent(input):
+def verifyVisualContent(input, mime_type):
 	print "verifying visual content"
 	j = open("%s.j3m" % input[:-4], 'rb')
 	supplied_hashes = json.loads(j.read())['genealogy']['hashes']
 	j.close()
 
 	# ffmpeg -f image2 -i IMG_20131209_054750.jpg -vcodec copy -an -crf 32 -threads 1 -f md5 -
-	if input.endsWith("jpg"):
+	if mime_type == mime_types['image']:
 		verify = ShellThreader([
 			"ffmpeg", 
 			"-f","image2", 
@@ -73,7 +75,7 @@ def verifyVisualContent(input):
 	verified_hash = md5.read().replace("MD5=", "")
 	md5.close()
 	
-	print "comparing supplied hash with %s" % verified_hash
+	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
 	
 	if type(supplied_hashes) is list:
 		for hash in supplied_hashes:
@@ -109,7 +111,7 @@ class J3Mifier(threading.Thread):
 		
 		if ok:
 			self.submission.j3m_verified = verifySignature(self.input)
-			self.submission.media_verified = verifyVisualContent(self.input)
+			self.submission.media_verified = verifyVisualContent(self.input, mime_type)
 
 		self.submission.save()
 		
