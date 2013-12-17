@@ -116,5 +116,9 @@ class ImportClient(InformaCamDataClient):
 		
 		return False
 	
+	def lockFile(self, file):
+		super(ImportClient, self).lockFile(file)
+		os.remove(file)
+	
 	def updateLog(self):
 		super(ImportClient, self).updateLog(import_directory['absorbed_log'])

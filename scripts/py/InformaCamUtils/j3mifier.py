@@ -17,6 +17,7 @@ def verifySignature(input):
 	gpg = gnupg.GPG(homedir=gnupg_home)
 	verified = gpg.verify_file("%s.j3m" % input[:-4], sig_file="%s.j3m.sig" % input[:-4])
 
+	print "verified fingerprint: %s" % verified.fingerprint
 	if verified.fingerprint is None:
 		return False
 
@@ -25,6 +26,7 @@ def verifySignature(input):
 	j.close()
 
 	supplied_fingerprint = str(json.loads(j3m_data)['genealogy']['createdOnDevice'])
+	print "supplied fingerprint: %s" % supplied_fingerprint
 	if verified.fingerprint.upper() == supplied_fingerprint.upper():
 		print "Signature valid for %s" % verified.fingerprint.upper()
 		return True
@@ -40,17 +42,32 @@ def compareHash(client_hash, server_hash):
 	
 	return False
 
-def verifyVisualContent(input):
+def verifyVisualContent(input, mime_type):
 	print "verifying visual content"
 	j = open("%s.j3m" % input[:-4], 'rb')
 	supplied_hashes = json.loads(j.read())['genealogy']['hashes']
 	j.close()
-	
-	verify = ShellThreader([
-		"ffmpeg", "-y", "-i", input,
-		"-acodec", "copy", "-f", "md5", 
-		"%s.md5.txt" % input[:-4]
-	])
+
+	# ffmpeg -f image2 -i IMG_20131209_054750.jpg -vcodec copy -an -crf 32 -threads 1 -f md5 -
+	if mime_type == mime_types['image']:
+		verify = ShellThreader([
+			"ffmpeg", 
+			"-f","image2", 
+			"-i", input,
+			"-vcodec","copy",
+			"-an", 
+			"-crf","32",
+			"-threads","1"
+			"-f", "md5", 
+			"%s.md5.txt" % input[:-4]
+		])
+	else:
+		verify = ShellThreader([
+			"ffmpeg", "-y", "-i", input,
+			"-acodec", "copy", "-f", "md5", 
+			"%s.md5.txt" % input[:-4]
+		])
+		
 	verify.start()
 	verify.join()
 	
@@ -58,7 +75,7 @@ def verifyVisualContent(input):
 	verified_hash = md5.read().replace("MD5=", "")
 	md5.close()
 	
-	print "comparing supplied hash with %s" % verified_hash
+	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
 	
 	if type(supplied_hashes) is list:
 		for hash in supplied_hashes:
@@ -94,7 +111,7 @@ class J3Mifier(threading.Thread):
 		
 		if ok:
 			self.submission.j3m_verified = verifySignature(self.input)
-			self.submission.media_verified = verifyVisualContent(self.input)
+			self.submission.media_verified = verifyVisualContent(self.input, mime_type)
 
 		self.submission.save()
 		
@@ -117,10 +134,19 @@ class J3Mifier(threading.Thread):
 
 		f = open("%s.txt" % self.input[:-4], 'rb')
 		txt = open("%s.txt.b64" % self.input[:-4], 'a+')
+		tiff = open("%s.tiff.txt" % self.input[:-4], 'a+')
+		
+		"""
+			because some versions of informacam will include the original exif,
+			let's stash this info somewhere else, because it's great data
+		"""
+		obscura_marker_found = False
+		
 		for line in f:
 			if re.match(r'^file: .*', line):
 				continue
 			if re.match(r'^Got obscura marker.*', line):
+				obscura_marker_found = True
 				continue
 			if re.match(r'^Generic APPn ffe0 loaded.*', line):
 				continue
@@ -128,9 +154,15 @@ class J3Mifier(threading.Thread):
 				continue
 			if re.match(r'^Didn\'t find .*', line):
 				continue
-			txt.write(line)
+			
+			if obscura_marker_found:
+				txt.write(line)
+			else:
+				tiff.write(line)
+				
 		f.close()
 		txt.close()
+		tiff.close()
 
 		if self.getJ3MMetadata():
 			if not self.on_reindex:
