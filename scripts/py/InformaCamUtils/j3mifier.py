@@ -134,10 +134,19 @@ class J3Mifier(threading.Thread):
 
 		f = open("%s.txt" % self.input[:-4], 'rb')
 		txt = open("%s.txt.b64" % self.input[:-4], 'a+')
+		tiff = open("%s.tiff.txt" % self.input[:-4], 'a+')
+		
+		"""
+			because some versions of informacam will include the original exif,
+			let's stash this info somewhere else, because it's great data
+		"""
+		obscura_marker_found = False
+		
 		for line in f:
 			if re.match(r'^file: .*', line):
 				continue
 			if re.match(r'^Got obscura marker.*', line):
+				obscura_marker_found = True
 				continue
 			if re.match(r'^Generic APPn ffe0 loaded.*', line):
 				continue
@@ -145,9 +154,15 @@ class J3Mifier(threading.Thread):
 				continue
 			if re.match(r'^Didn\'t find .*', line):
 				continue
-			txt.write(line)
+			
+			if obscura_marker_found:
+				txt.write(line)
+			else:
+				tiff.write(line)
+				
 		f.close()
 		txt.close()
+		tiff.close()
 
 		if self.getJ3MMetadata():
 			if not self.on_reindex:
