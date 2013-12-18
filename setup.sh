@@ -10,27 +10,32 @@ sudo pip install oauth2client
 sudo pip install urllib3
 
 echo ========== setting up python packages
-cd packages/tornado
+cd packages/tornado/
+sudo python setup.py install
+cd ../..
+pwd
+
+cd packages/fabric/
+sudo python setup.py install
+cd ../..
+pwd
+
+cd packages/requests/
 sudo python setup.py install
 cd ../..
 
-cd packages/fabric
+pwd
+cd packages/filemagic/
 sudo python setup.py install
 cd ../..
 
-cd packages/requests
-sudo python setup.py install
-cd ../..
-
-cd packages/filemagic
-sudo python setup.py install
-cd ../..
-
-cd packages/python-gnupg
+pwd
+cd packages/python-gnugp
 sudo make install
 cd ../..
 
-cd packages/JavaMediaHasher
+pwd
+cd packages/JavaMediaHasher/
 ant dist
 cd ../..
 
@@ -43,11 +48,11 @@ cd ../..
   
 sudo apt-get install ffmpeg2theora
 
-cd /scripts/py/
+cd scripts/py/
 ln -s ../../conf/conf.py .
 cd ../..
 
 echo =======================================
 echo now setup GPG key and export it properly as indicated in the README file
 echo please make sure your conf/conf.py configuration file exists and is properly configured
-echo and then you may run > python scripts/py/unveillance.py start
+echo and then you may run scripts/py/unveillance.py start
