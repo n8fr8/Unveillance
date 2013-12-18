@@ -31,6 +31,7 @@ sudo make install
 cd ../..
 
 cd packages/JavaMediaHasher
+ant dist
 cd ../..
 
 echo =========== configuring and compiling ffmpeg software
