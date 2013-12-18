@@ -30,6 +30,9 @@ cd packages/python-gnupg
 sudo make install
 cd ../..
 
+cd packages/JavaMediaHasher
+cd ../..
+
 echo =========== configuring and compiling ffmpeg software
 cd packages/FFmpeg
 ./configure
@@ -39,14 +42,11 @@ cd ../..
   
 sudo apt-get install ffmpeg2theora
 
-echo =========== setting up openpgp keys
-gpg --gen-key
-gpg --export-secret-keys --armor (key-email-you-provided in step #1) > conf/privkey.asc
-gpg --export --armor (key-email-you-provided in step #1) > conf/pubkey.asc
-
 cd /scripts/py/
 ln -s ../../conf/conf.py .
+cd ../..
 
 echo =======================================
+echo now setup GPG key and export it properly as indicated in the README file
 echo please make sure your conf/conf.py configuration file exists and is properly configured
 echo and then you may run > python scripts/py/unveillance.py start
