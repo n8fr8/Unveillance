@@ -19,3 +19,6 @@
 [submodule "packages/j3m/jpeg-redaction"]
 	path = packages/j3m/jpeg-redaction
 	url = https://github.com/harlo/Jpeg-Redaction-Library.git
+[submodule "packages/JavaMediaHasher"]
+	path = packages/JavaMediaHasher
+	url = https://github.com/n8fr8/JavaMediaHasher.git
