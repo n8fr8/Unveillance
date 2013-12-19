@@ -13,9 +13,12 @@
 [submodule "packages/fabric"]
 	path = packages/fabric
 	url = https://github.com/fabric/fabric.git
-[submodule "packages/python-gnugp"]
-	path = packages/python-gnugp
+[submodule "packages/python-gnupg"]
+	path = packages/python-gnupg
 	url = https://github.com/isislovecruft/python-gnupg.git
 [submodule "packages/j3m/jpeg-redaction"]
 	path = packages/j3m/jpeg-redaction
 	url = https://github.com/harlo/Jpeg-Redaction-Library.git
+[submodule "packages/JavaMediaHasher"]
+	path = packages/JavaMediaHasher
+	url = https://github.com/n8fr8/JavaMediaHasher.git

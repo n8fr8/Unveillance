@@ -1,7 +1,7 @@
 import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
-from conf import gnupg_home, mime_types, scripts_home, j3m as j3m_root
+from conf import gnupg_home, mime_types, scripts_home, main_dir, j3m as j3m_root
 from conf import gnupg_pword, scripts_home
 from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
@@ -48,19 +48,20 @@ def verifyVisualContent(input, mime_type):
 	supplied_hashes = json.loads(j.read())['genealogy']['hashes']
 	j.close()
 
-	# ffmpeg -f image2 -i IMG_20131209_054750.jpg -vcodec copy -an -crf 32 -threads 1 -f md5 -
 	if mime_type == mime_types['image']:
 		verify = ShellThreader([
-			"ffmpeg", 
-			"-f","image2", 
-			"-i", input,
-			"-vcodec","copy",
-			"-an", 
-			"-crf","32",
-			"-threads","1"
-			"-f", "md5", 
-			"%s.md5.txt" % input[:-4]
+			"java", 
+			"-jar","%s/packages/JavaMediaHasher/dist/JavaMediaHasher.jar" % main_dir, 
+			input,
+			">", 
+			"%s.mediahash.txt" % input[:-4]
 		])
+
+		verify.start()
+		verify.join()
+	
+		md5 = open("%s.mediahash.txt" % input[:-4], 'rb')
+		verified_hash = md5.read();
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
@@ -68,12 +69,12 @@ def verifyVisualContent(input, mime_type):
 			"%s.md5.txt" % input[:-4]
 		])
 		
-	verify.start()
-	verify.join()
+		verify.start()
+		verify.join()
 	
-	md5 = open("%s.md5.txt" % input[:-4], 'rb')
-	verified_hash = md5.read().replace("MD5=", "")
-	md5.close()
+		md5 = open("%s.md5.txt" % input[:-4], 'rb')
+		verified_hash = md5.read().replace("MD5=", "")
+		md5.close()
 	
 	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
 	
