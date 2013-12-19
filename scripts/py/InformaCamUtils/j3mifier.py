@@ -33,9 +33,12 @@ def verifySignature(input):
 
 	return False
 
-def compareHash(client_hash, server_hash):	
-	if len(client_hash) != 32:
+def compareHash(client_hash, server_hash):
+	if len(client_hash) != 40:
 		return False
+	
+	if type(client_hash) is unicode:
+		client_hash = str(client_hash)
 	
 	if client_hash == server_hash:
 		return True
@@ -56,7 +59,7 @@ def verifyVisualContent(input, mime_type):
 		], stdout = open("%s.md5.txt" % input[:-4], 'wb+'))
 			
 		md5 = open("%s.md5.txt" % input[:-4], 'rb')
-		verified_hash = md5.read();
+		verified_hash = md5.read().strip();
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
