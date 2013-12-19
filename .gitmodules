@@ -13,8 +13,8 @@
 [submodule "packages/fabric"]
 	path = packages/fabric
 	url = https://github.com/fabric/fabric.git
-[submodule "packages/python-gnupg"]
-	path = packages/python-gnupg
+[submodule "packages/python-gnugp"]
+	path = packages/python-gnugp
 	url = https://github.com/isislovecruft/python-gnupg.git
 [submodule "packages/j3m/jpeg-redaction"]
 	path = packages/j3m/jpeg-redaction
