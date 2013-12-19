@@ -49,18 +49,13 @@ def verifyVisualContent(input, mime_type):
 	j.close()
 
 	if mime_type == mime_types['image']:
-		verify = ShellThreader([
-			"java", 
-			"-jar","%s/packages/JavaMediaHasher/dist/JavaMediaHasher.jar" % main_dir, 
-			input,
-			">", 
-			"%s.mediahash.txt" % input[:-4]
-		])
-
-		verify.start()
-		verify.join()
-	
-		md5 = open("%s.mediahash.txt" % input[:-4], 'rb')
+		verify = subprocess.call([
+			"java", "-jar",
+			"%s/packages/JavaMediaHasher/dist/JavaMediaHasher.jar" % main_dir,
+			input
+		], stdout = open("%s.md5.txt" % input[:-4], 'a+'))
+			
+		md5 = open("%s.md5.txt" % input[:-4], 'rb')
 		verified_hash = md5.read();
 	else:
 		verify = ShellThreader([
