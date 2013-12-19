@@ -33,7 +33,7 @@ def verifySignature(input):
 
 	return False
 
-def compareHash(client_hash, server_hash):
+def compareHash(client_hash, server_hash):	
 	if len(client_hash) != 32:
 		return False
 	
@@ -53,7 +53,7 @@ def verifyVisualContent(input, mime_type):
 			"java", "-jar",
 			"%s/packages/JavaMediaHasher/dist/JavaMediaHasher.jar" % main_dir,
 			input
-		], stdout = open("%s.md5.txt" % input[:-4], 'a+'))
+		], stdout = open("%s.md5.txt" % input[:-4], 'wb+'))
 			
 		md5 = open("%s.md5.txt" % input[:-4], 'rb')
 		verified_hash = md5.read();
@@ -74,7 +74,9 @@ def verifyVisualContent(input, mime_type):
 	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
 	
 	if type(supplied_hashes) is list:
+		print "list of hashes..."
 		for hash in supplied_hashes:
+			print hash
 			if compareHash(hash, verified_hash):
 				return True
 	else:
