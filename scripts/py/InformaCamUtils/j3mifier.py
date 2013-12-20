@@ -60,7 +60,8 @@ def verifyVisualContent(input, mime_type):
 		], stdout = open("%s.md5.txt" % input[:-4], 'wb+'))
 			
 		md5 = open("%s.md5.txt" % input[:-4], 'rb')
-		verified_hash = md5.read().strip();
+		verified_hash = md5.read().strip()
+		md5.close()
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
@@ -72,7 +73,7 @@ def verifyVisualContent(input, mime_type):
 		verify.join()
 	
 		md5 = open("%s.md5.txt" % input[:-4], 'rb')
-		verified_hash = md5.read().replace("MD5=", "")
+		verified_hash = md5.read().replace("MD5=", "").strip()
 		md5.close()
 	
 	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
