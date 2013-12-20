@@ -63,7 +63,8 @@ class InformaCamDataClient():
 			file_id (string)
 				usually an id for the file
 		"""
-		print "getting file %s" % file_id
+		#print "getting file %s" % file_id
+		pass
 		
 	def absorb(self, file):
 		"""Marks file as absorbed by the server.  Subsequent pulls to the repository may omit files that have been absorbed.

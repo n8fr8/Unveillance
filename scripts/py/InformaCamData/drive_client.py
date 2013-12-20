@@ -1,5 +1,5 @@
 import httplib2, json, datetime
-from time import sleep, strptime, mktime
+from time import sleep, strptime, mktime, time
 
 from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import OAuth2WebServerFlow
@@ -7,7 +7,7 @@ from apiclient import errors
 from apiclient.discovery import build
 
 from informacam_data_client import InformaCamDataClient
-from conf import drive
+from conf import drive, mime_types
 
 scopes = [
 	'https://www.googleapis.com/auth/drive',
@@ -37,6 +37,18 @@ class DriveClient(InformaCamDataClient):
 		self.mime_types['folder'] = "application/vnd.google-apps.folder"
 		self.mime_types['file'] = "application/vnd.google-apps.file"
 		
+		try:
+			files = self.service.children().list(folderId=drive['asset_root']).execute()
+			self.files_manifest = []
+			for f in files['items']:
+				self.files_manifest.append(self.getFile(f['id']))
+
+			print "files absorbed: %d" % len(self.files_manifest)
+
+		except errors.httpError as e:
+			print e
+		
+		
 	def getAssetMimeType(self, fileId):
 		super(DriveClient, self).getAssetMimeType(fileId)
 		
@@ -60,7 +72,7 @@ class DriveClient(InformaCamDataClient):
 		except errors.HttpError, error:
 			return None
 			
-	def pullFile(self, file):		
+	def pullFile(self, file):	
 		if type(file) is str or type(file) is unicode:
 			return self.pullFile(self.getFile(file))
 			
@@ -97,16 +109,23 @@ class DriveClient(InformaCamDataClient):
 		try:
 			files = self.service.files().list(**q).execute()
 		except errors.HttpError as e:
+			print e
 			return False
 			
 		for f in files['items']:
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
+			
+				# if is absorbed already,
+				print omit_absorbed 
+				if omit_absorbed and self.isAbsorbed(f['id'], f['mimeType']):
+					continue
 					
 				try:
 					clone = self.service.files().copy(
 						fileId=f['id'],
-						body={'title':f['title']}
+						body={'title':f['id']}
 					).execute()
+					print "copied over %s" % clone['id']
 					sleep(2)
 				except errors.HttpError as e:
 					print e
@@ -117,6 +136,7 @@ class DriveClient(InformaCamDataClient):
 						folderId=drive['asset_root'], 
 						body={'id':clone['id']}
 					).execute()
+					print "registered %s" % clone['id']
 					sleep(2)
 				except errors.HttpError as e:
 					print e
@@ -126,39 +146,31 @@ class DriveClient(InformaCamDataClient):
 					print self.service.files().delete(
 						fileId=f['id']
 					).execute()
+					print "deleted original file over %s" % f['id']
 					sleep(2)
 				except errors.HttpError as e:
 					print e
 					continue
-		
-		try:
-			files = self.service.children().list(folderId=drive['asset_root']).execute()
-		except errors.HttpError as e:
-			return False
-			
-		for f in files['items']:
-			f = self.getFile(f['id'])
-			# google is 5 hours ahead of Eastern btw
-			time_delta = datetime.timedelta(hours=-5)
-			
-			date_str = " ".join(f['createdDate'].split("T")).split(".")[0]
-			created_date = datetime.datetime(*strptime(date_str, "%Y-%m-%d %H:%M:%S")[:6])
-			created_date = created_date + time_delta
-			
-			new_time = mktime(created_date.timetuple())
-			if new_time > self.last_update_for_mode:
-				self.last_update_for_mode = new_time
-			
-			if omit_absorbed and self.isAbsorbed(new_time):
-				continue
 				
-			assets.append(f['id'])
+				assets.append(clone['id'])
 		
+		self.last_update_for_mode = time() * 1000
 		return assets
 		
-	def isAbsorbed(self, date_created):
-		if date_created <= self.absorbedByInformaCam[self.mode]:
-			return True
+	def isAbsorbed(self, file_name, mime_type):
+		# actually, if hash is already a file name
+		if self.mode == "sources":
+			if mime_type != mime_types['zip']:
+				return True
+		elif self.mode == "submissions":
+			if mime_type == mime_types['zip']:
+				return True
+		
+		for f in self.files_manifest:
+			print "does %s == %s?" % (f['title'], file_name)
+			
+			if f['title'] == file_name:
+				return True
 			
 		return False
 		
