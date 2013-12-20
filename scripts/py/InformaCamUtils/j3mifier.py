@@ -58,6 +58,7 @@ def verifyVisualContent(input, ext_index, mime_type):
 			
 		md5 = open("%s.md5.txt" % input[:ext_index], 'rb')
 		verified_hash = md5.read().strip();
+		md5.close()
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
