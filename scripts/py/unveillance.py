@@ -4,7 +4,9 @@ from multiprocessing import Process
 from math import fabs
 import xml.etree.ElementTree as ET
 
-from conf import gnupg_home, elasticsearch_home, secret_key_path, scripts_home, log_root, sync_sleep, public_user, api, import_directory, assets_root, forms, forms_root, conf_root
+from vars import scripts_home, sync_sleep, api, import_directory, elasticsearch_home
+from conf import gnupg_home, secret_key_path, log_root,  public_user, assets_root, forms, forms_root, conf_root
+
 from InformaCamUtils.funcs import ShellThreader
 from InformaCamUtils.elasticsearch import Elasticsearch
 from intake import watch, reindex
@@ -99,7 +101,7 @@ def initFiles():
 	from conf import drive
 	subprocess.Popen(["touch", drive['absorbed_log']])
 	
-	from conf import j3m
+	from vars import j3m
 	try:
 		with open(os.path.join(j3m['root'], "j3mparser.out")):
 			print "(j3m parser already compiled.  skipping make...)"

@@ -1,8 +1,10 @@
 import sys, subprocess, os, cStringIO, re, json, math, operator
 import gzip, threading, hashlib
-from conf import api
+
 from Crypto.Cipher import AES
 from Crypto import Random
+
+from vars import api
 
 R = 6372.8	#km
 

@@ -5,7 +5,9 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 
-from conf import scripts_home, mime_types, public, invalidate, submissions_dump, api as api_prefs, import_directory, log_root
+from vars import scripts_home, mime_types, public, invalidate, submissions_dump, api as api_prefs, import_directory
+from conf import log_root
+
 from InformaCamModels.source import Source as ICSource
 from InformaCamModels.submission import Submission as ICSubmission
 from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset

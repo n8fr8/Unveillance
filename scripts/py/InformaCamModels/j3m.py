@@ -1,7 +1,9 @@
 import os, sys, hashlib, json, base64
 
 from asset import Asset
-from conf import assets_root, forms_root, mime_types
+
+from vars import mime_types
+from conf import assets_root, forms_root
 
 class J3M(Asset):
 	def __init__(self, path_to_j3m=None, _id=None, inflate=None):		

@@ -2,7 +2,9 @@ import os, sys
 
 from asset import Asset
 from j3m import J3M
-from conf import assets_root, j3m, scripts_home, invalidate, mime_types
+
+from vars import j3m, scripts_home, invalidate, mime_types
+from conf import assets_root
 
 class Submission(Asset):
 	def __init__(self, inflate=None, _id=None, reindex=False):

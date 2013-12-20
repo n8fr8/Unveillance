@@ -1,8 +1,10 @@
 import magic, os, json, sys, re, time
 from math import fabs
 
+from vars import scripts_home
+from conf import globaleaks, assets_root
+
 from informacam_data_client import InformaCamDataClient
-from conf import globaleaks, assets_root, scripts_home
 from InformaCamUtils.funcs import ShellReader, ShellThreader
 
 class GlobaleaksClient(InformaCamDataClient):

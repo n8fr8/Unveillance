@@ -1,5 +1,7 @@
 import json, copy, md5, time, os
-from conf import file_salt, scripts_home, mime_types, mime_type_map
+
+from vars import scripts_home, mime_types, mime_type_map
+from conf import file_salt
 
 __metaclass__ = type
 

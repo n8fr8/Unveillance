@@ -6,8 +6,10 @@ from oauth2client.client import OAuth2WebServerFlow
 from apiclient import errors
 from apiclient.discovery import build
 
+from vars import mime_types
+from conf import drive
+
 from informacam_data_client import InformaCamDataClient
-from conf import drive, mime_types
 
 scopes = [
 	'https://www.googleapis.com/auth/drive',

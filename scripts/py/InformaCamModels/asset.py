@@ -7,7 +7,8 @@ locked_fields = ['asset_path', 'file_name', 'date_admitted', 'sync_source']
 
 class Asset():
 	def __init__(self, inflate=None, _id=None, extra_omits=None, extra_fields=None, river=None):
-		from conf import invalidate, scripts_home, public_user
+		from vars import invalidate, scripts_home
+		from conf import public_user
 		from InformaCamUtils.elasticsearch import Elasticsearch
 
 		self.es = Elasticsearch(river=river)

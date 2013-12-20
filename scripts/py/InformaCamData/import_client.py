@@ -1,7 +1,7 @@
 import magic, os, sys
 from informacam_data_client import InformaCamDataClient
 
-from conf import import_directory, scripts_home
+from vars import import_directory, scripts_home
 
 sys.path.insert(0, "%sInformaCamUtils" % scripts_home['python'])
 from funcs import ShellThreader

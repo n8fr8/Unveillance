@@ -1,7 +1,9 @@
 import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
-from conf import gnupg_home, gnupg_pword, mime_types, scripts_home, main_dir, j3m as j3m_root
+from vars import mime_types, scripts_home, j3m as j3m_root
+from conf import gnupg_home, gnupg_pword, main_dir
+
 from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
 from InformaCamModels.j3m import J3M

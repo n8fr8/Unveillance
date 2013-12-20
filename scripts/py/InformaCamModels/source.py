@@ -1,7 +1,10 @@
 import gnupg, json, os, re
 
 from asset import Asset
-from conf import gnupg_home, assets_root, invalidate
+
+from vars import invalidate
+from conf import gnupg_home, assets_root
+
 from InformaCamUtils.funcs import ShellReader
 
 class Source(Asset):

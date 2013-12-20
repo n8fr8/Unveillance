@@ -3,12 +3,14 @@ import os, sys, time, re
 from base64 import b64encode
 from requests import exceptions
 
+from vars import sync, sync_sleep, j3m, scripts_home
+from conf import assets_root
+
 from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
-from conf import sync, sync_sleep, j3m, scripts_home, assets_root
 
 def reindex():
-	from conf import mime_type_map
+	from vars import mime_type_map
 	from InformaCamUtils.elasticsearch import Elasticsearch
 	
 	elasticsearch = Elasticsearch()
