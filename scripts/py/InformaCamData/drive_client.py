@@ -111,12 +111,13 @@ class DriveClient(InformaCamDataClient):
 		except errors.HttpError as e:
 			print e
 			return False
-			
+		
+		print self.mime_types
 		for f in files['items']:
+			print f['mimeType']
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
 			
 				# if is absorbed already,
-				print omit_absorbed 
 				if omit_absorbed and self.isAbsorbed(f['id'], f['mimeType']):
 					continue
 					
@@ -125,6 +126,7 @@ class DriveClient(InformaCamDataClient):
 						fileId=f['id'],
 						body={'title':f['id']}
 					).execute()
+					self.files_manifest.append(clone)
 					print "copied over %s" % clone['id']
 					sleep(2)
 				except errors.HttpError as e:

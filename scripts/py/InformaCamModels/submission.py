@@ -2,7 +2,7 @@ import os, sys
 
 from asset import Asset
 from j3m import J3M
-from conf import assets_root, j3m, scripts_home, invalidate
+from conf import assets_root, j3m, scripts_home, invalidate, mime_types
 
 class Submission(Asset):
 	def __init__(self, inflate=None, _id=None, reindex=False):
@@ -26,7 +26,11 @@ class Submission(Asset):
 		if package_content is not None:
 			if not reindex:
 				if self.addFile(self.file_name, package_content):
-					self.importAssets(self.file_name)
+					if self.mime_type == mime_types['j3mlog']:
+						print "IT IS A J3M LOG!!!"
+						return				
+					else:
+						self.importAssets(self.file_name)
 		
 		if reindex:
 			self.j3mify(reindex=True)

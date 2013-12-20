@@ -171,7 +171,8 @@ mime_types = {
         'wildcard' : "application/octet-stream",
         'pgp' : "application/pgp",
         'gzip' : "application/x-gzip",
-        '3gp' : 'video/3gpp'
+        '3gp' : 'video/3gpp',
+	'j3mlog' : "informacam/log"
 }
 
 mime_type_map = {
@@ -182,5 +183,6 @@ mime_type_map = {
         'application/octet-stream': 'wildcard',
         'application/pgp' : 'pgp',
         'application/x-gzip' : 'gzip',
-        'video/3gpp' : '3gp'
+        'video/3gpp' : '3gp',
+	'informacam/log' : 'j3mlog'
 }
