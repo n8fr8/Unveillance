@@ -34,10 +34,7 @@ def verifySignature(input):
 
 	return False
 
-def compareHash(client_hash, server_hash):
-	if len(client_hash) != 40 or len(client_hash) != 32:
-		return False
-	
+def compareHash(client_hash, server_hash):	
 	if type(client_hash) is unicode:
 		client_hash = str(client_hash)
 	
