@@ -64,7 +64,7 @@ def verifyVisualContent(input, mime_type):
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
-			"-acodec", "copy", "-f", "md5", 
+			"-vcodec", "copy","-an", "-f", "md5", 
 			"%s.md5.txt" % input[:-4]
 		])
 		
