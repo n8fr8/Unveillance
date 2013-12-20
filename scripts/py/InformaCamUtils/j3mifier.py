@@ -1,8 +1,7 @@
 import os, base64, gzip, magic, json, gnupg, subprocess, re, sys, threading
 from multiprocessing import Process
 
-from conf import gnupg_home, mime_types, scripts_home, main_dir, j3m as j3m_root
-from conf import gnupg_pword, scripts_home
+from conf import gnupg_home, gnupg_pword, mime_types, scripts_home, main_dir, j3m as j3m_root
 from funcs import ShellThreader, unGzipAsset
 from InformaCamModels.submission import Submission
 from InformaCamModels.j3m import J3M
@@ -34,7 +33,7 @@ def verifySignature(input):
 	return False
 
 def compareHash(client_hash, server_hash):
-	if len(client_hash) != 40:
+	if len(client_hash) != 40 or len(client_hash) != 32:
 		return False
 	
 	if type(client_hash) is unicode:

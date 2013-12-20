@@ -169,8 +169,6 @@ class DriveClient(InformaCamDataClient):
 				return True
 		
 		for f in self.files_manifest:
-			print "does %s == %s?" % (f['title'], file_name)
-			
 			if f['title'] == file_name:
 				return True
 			
