@@ -69,7 +69,7 @@ def verifyVisualContent(input, mime_type):
 		verify.join()
 	
 		md5 = open("%s.md5.txt" % input[:-4], 'rb')
-		verified_hash = md5.read().replace("MD5=", "")
+		verified_hash = md5.read().strip().replace("MD5=", "")
 		md5.close()
 	
 	print "comparing supplied %s hash with %s" % (supplied_hashes, verified_hash)
