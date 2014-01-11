@@ -1,10 +1,10 @@
-import sys, subprocess, os, cStringIO, re, json, math, operator
-import gzip, threading, hashlib
+import sys, subprocess, os, cStringIO, re, json, math, operator, time
+import gzip, threading, hashlib, magic, md5
 
 from Crypto.Cipher import AES
 from Crypto import Random
 
-from vars import api
+from vars import api, mime_types, scripts_home
 
 R = 6372.8	#km
 
@@ -39,6 +39,121 @@ class ExternalApiThreader(threading.Thread):
 		
 	def run(self):
 		self.output = callExternalApi(self.url, data=self.data, post=self.post, cookiejar=self.cookiejar, send_cookie=self.send_cookie)
+
+def getBespokeFileExtension(file):
+	rx = r'(.*)/(.*)\.(jpg|mkv|j3m|j3mlog|zip|json)$'
+	ry = r'(.*)\.(jpg|mkv|j3m|j3mlog|zip|json)$'
+	
+	x = None
+	if re.match('/', file):
+		x = re.findall(rx, file)
+	else:
+		x = re.findall(ry, file)
+	if x is not None and len(x) == 1:
+		return x[0]
+	else:
+		return None
+	
+
+def decryptFile(input, output, passphrase=None):
+	if passphrase is None:
+		from conf import gnupg_pword
+		pwd = open(gnupg_pword, 'rb')
+		passphrase = pwd.read().strip()
+		pwd.close()
+		
+	gpg_cmd = [
+		"gpg", "--no-tty", "--passphrase", passphrase,
+		"--output", out, "--decrypt", input
+	]
+	
+	gpg_thread = ShellThreader(gpg_cmd)
+	gpg_thread.start()
+	gpg_thread.join()
+	return gpg_thread.output
+
+def validateSignature(input, signature, fingerprint):
+	import gnupg
+	from conf import gnupg_home
+	print "INPUT:\n%s" % input
+	print "SIGNATURE:\n%s" % signature
+	
+	gpg = gnupg.GPG(homedir=gnupg_home)
+	verified = gpg.verify_file(input, sig_file=signature)
+	print "verified fingerprint: %s" % verified.fingerprint
+	if verified.fingerprint is None:
+		return False
+	
+	print "supplied fingerprint: %s" % fingerprint
+	if verified.fingerprint.upper() == fingerprint.upper():
+		print "Signature valid for %s" % verified.fingerprint.upper()
+		return True
+
+	return False
+	
+def hashString(name_base):
+	from conf import file_salt
+	
+	m = md5.new()
+	m.update(name_base)
+	m.update(file_salt)
+	m.update(repr(time.time()))
+	
+	return m.hexdigest()
+
+def getMimeTypeFromFile(file):
+	m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
+	try:
+		mime_type = m.id_filename(file)
+	except:
+		print "error getting mime type for %s" % file
+		m.close()
+		return None
+		
+	m.close()
+	if mime_type == mime_types['wildcard']:
+		mime_type = validateMediaObject(file, returnType=True)
+	
+	return mime_type
+
+def validateMediaObject(file, returnType=False):
+	f_parent = os.path.abspath(os.path.join(file, os.pardir))
+	ffmpeg_log = os.path.join(f_parent, "ffmpeg_log.txt")
+	ffmpeg_thread = ShellThreader([
+		"fab",
+		"-f",
+		os.path.join("%sInformaCamData" % scripts_home['python'],"ffmpeg_helper.py"),
+		"getInfo:input=%s,output=%s" % (file, ffmpeg_log)
+	])
+	ffmpeg_thread.start()
+	ffmpeg_thread.join()
+	
+	isValid = False
+	mime_type_found = None
+	input_0 = None
+	input_0_sentinel = "Input #0, "
+	
+	for line in open(ffmpeg_log, 'rb'):
+		input_0_location = line.find(input_0_sentinel)
+			
+		if input_0_location >= 0:
+			input_0 = line[(input_0_location + len(input_0_sentinel)):]
+			print input_0
+			if input_0.find("matroska") >= 0:
+				isValid = True
+				mime_type_found = mime_types['video']
+				break
+			elif input_0.find("image2") >= 0:
+				isValid = True
+				mime_type_found = mime_types['image']
+				break
+			
+	os.remove(ffmpeg_log)
+	
+	if not returnType:
+		return isValid
+	else:
+		return mime_type_found
 
 def gzipAsset(path_to_file):
 	_out = cStringIO.StringIO()

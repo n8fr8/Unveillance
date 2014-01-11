@@ -8,6 +8,7 @@ from conf import sync, assets_root
 
 from InformaCamModels.source import Source
 from InformaCamModels.submission import Submission
+from InformaCamUtils.funcs import getBespokeFileExtension
 
 def reindex():
 	from vars import mime_type_map
@@ -132,7 +133,12 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 				}
 				print "%s is a submission" % data['file_name']
 				
-				if data['file_name'][-4:] != ".%s" % client.mime_type_map[mime_type]:
+				file_name_segments = getBespokeFileExtension(data['file_name'])
+				if file_name_segments is None:
+					print "could not map file extension for %s" % data['file_name']
+					sys.exit(0)
+				
+				if file_name_segments[-1] != client.mime_type_map[mime_type]:
 					data['file_name'] = "%s.%s" % (
 						data['file_name'], 
 						client.mime_type_map[mime_type]

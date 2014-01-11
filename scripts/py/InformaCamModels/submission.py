@@ -28,11 +28,7 @@ class Submission(Asset):
 		if package_content is not None:
 			if not reindex:
 				if self.addFile(self.file_name, package_content):
-					if self.mime_type == mime_types['j3mlog']:
-						print "IT IS A J3M LOG!!!"
-						return				
-					else:
-						self.importAssets(self.file_name)
+					self.importAssets(self.file_name)
 		
 		if reindex:
 			self.j3mify(reindex=True)
