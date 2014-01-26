@@ -340,8 +340,10 @@ class J3Mifier(threading.Thread):
 		# save to [fname].j3m
 		front_sentinel = "{\"j3m\":"
 		back_sentinel = ",\"signature\":"
-		extracted_j3m = j3m_data[len(front_sentinel) : j3m_data.index(back_sentinel)]
 
+		# this must be the LAST INSTANCE OF signature, btw.
+		print "FINDING BACK SENTINEL at position %d" % j3m_data.rindex(back_sentinel)
+		extracted_j3m = j3m_data[len(front_sentinel) : j3m_data.rindex(back_sentinel)]
 
 		f = open("%s.j3m" % self.input[:self.ext_index], 'wb+')
 		f.write(extracted_j3m)
