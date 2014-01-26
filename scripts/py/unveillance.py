@@ -73,6 +73,7 @@ def initFiles():
 	subprocess.Popen(["mkdir","%ssources" % assets_root])
 	subprocess.Popen(["mkdir","%ssubmissions" % assets_root])		
 	subprocess.Popen(["mkdir","%stmp" % assets_root])
+	subprocess.Popen(["mkdir","%scollections" % assets_root])
 	subprocess.Popen(["touch","%sreindex.txt" % log_root])
 	
 	for file, vals in files.iteritems():

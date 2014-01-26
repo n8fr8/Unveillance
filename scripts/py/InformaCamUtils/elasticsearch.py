@@ -61,6 +61,20 @@ class Elasticsearch():
 					}
 				}
 			},
+			"collections" : {
+				"properties" : {
+					"submissions" : {
+						"type" : "nested",
+						"include_in_parent" : True,
+						"include_in_root" : True
+					},
+					"sensor_captures" : {
+						"type" : "nested",
+						"include_in_parent" : True,
+						"include_in_root" : True
+					}
+				}
+			},
 			"j3m" : {
 				"properties" : {
 					"asset_path": {

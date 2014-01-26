@@ -13,16 +13,16 @@ resolutions = [
 	{"med_" : [0.75,0.75]}
 ]
 
-def verifySignature(input):
+def verifySignature(input, ext_index):
 	print "verifying signature"
 	gpg = gnupg.GPG(homedir=gnupg_home)
-	verified = gpg.verify_file("%s.j3m" % input[:-4], sig_file="%s.j3m.sig" % input[:-4])
+	verified = gpg.verify_file("%s.j3m" % input[:ext_index], sig_file="%s.j3m.sig" % input[:ext_index])
 
 	print "verified fingerprint: %s" % verified.fingerprint
 	if verified.fingerprint is None:
 		return False
 
-	j = open("%s.j3m" % input[:-4], 'rb')
+	j = open("%s.j3m" % input[:ext_index], 'rb')
 	j3m_data = j.read()
 	j.close()
 
@@ -43,9 +43,9 @@ def compareHash(client_hash, server_hash):
 	
 	return False
 
-def verifyVisualContent(input, mime_type):
+def verifyVisualContent(input, ext_index, mime_type):
 	print "verifying visual content"
-	j = open("%s.j3m" % input[:-4], 'rb')
+	j = open("%s.j3m" % input[:ext_index], 'rb')
 	supplied_hashes = json.loads(j.read())['genealogy']['hashes']
 	j.close()
 
@@ -54,21 +54,21 @@ def verifyVisualContent(input, mime_type):
 			"java", "-jar",
 			"%s/packages/JavaMediaHasher/dist/JavaMediaHasher.jar" % main_dir,
 			input
-		], stdout = open("%s.md5.txt" % input[:-4], 'wb+'))
+		], stdout = open("%s.md5.txt" % input[:ext_index], 'wb+'))
 			
-		md5 = open("%s.md5.txt" % input[:-4], 'rb')
+		md5 = open("%s.md5.txt" % input[:ext_index], 'rb')
 		verified_hash = md5.read().strip();
 	else:
 		verify = ShellThreader([
 			"ffmpeg", "-y", "-i", input,
 			"-vcodec", "copy","-an", "-f", "md5", 
-			"%s.md5.txt" % input[:-4]
+			"%s.md5.txt" % input[:ext_index]
 		])
 		
 		verify.start()
 		verify.join()
 	
-		md5 = open("%s.md5.txt" % input[:-4], 'rb')
+		md5 = open("%s.md5.txt" % input[:ext_index], 'rb')
 		verified_hash = md5.read().strip().replace("MD5=", "")
 		md5.close()
 	
@@ -95,6 +95,16 @@ class J3Mifier(threading.Thread):
 		self.submission = submission
 		self.on_reindex = reindex
 		
+		from funcs import getBespokeFileExtension
+		file_name_segments = getBespokeFileExtension(self.input)
+		print file_name_segments
+		if file_name_segments is not None:
+			self.ext_index = -1 * (len(file_name_segments[-1]) + 1)
+		else:
+			self.ext_index = -4
+		
+		print "EXT INDEX: %d" % self.ext_index
+		
 	def run(self):
 		print "j3mifying %s" % self.submission.asset_path		
 		mime_type = self.submission.mime_type
@@ -103,14 +113,15 @@ class J3Mifier(threading.Thread):
 			ok = self.getImageMetadata()
 		elif mime_type == mime_types['video']:
 			ok = self.getVideoMetadata()
-		elif mime_type == mime_types['j3m']:
-			os.rename(self.input, "%s.txt.b64" % self.input[:-4])
-			self.input = "%s.txt.b64" % self.input[:-4]
+		elif mime_type in [mime_types['j3mlog'], mime_types['j3m']]:	
+			os.rename(self.input, "%s.txt.b64" % self.input[:self.ext_index])
+			#self.input = "%s.txt.b64" % self.input[:self.ext_index]			
 			ok = self.getJ3MMetadata()
+			return
 		
 		if ok:
-			self.submission.j3m_verified = verifySignature(self.input)
-			self.submission.media_verified = verifyVisualContent(self.input, mime_type)
+			self.submission.j3m_verified = verifySignature(self.input, self.ext_index)
+			self.submission.media_verified = verifyVisualContent(self.input, self.ext_index, mime_type)
 
 		self.submission.save()
 		
@@ -128,12 +139,12 @@ class J3Mifier(threading.Thread):
 			self.input
 		]
 		print j3mparser_cmd
-		p = subprocess.Popen(j3mparser_cmd, stdout=file("%s.txt" % self.input[:-4], "a+"))
+		p = subprocess.Popen(j3mparser_cmd, stdout=file("%s.txt" % self.input[:self.ext_index], "a+"))
 		p.wait()
 
-		f = open("%s.txt" % self.input[:-4], 'rb')
-		txt = open("%s.txt.b64" % self.input[:-4], 'a+')
-		tiff = open("%s.tiff.txt" % self.input[:-4], 'a+')
+		f = open("%s.txt" % self.input[:self.ext_index], 'rb')
+		txt = open("%s.txt.b64" % self.input[:self.ext_index], 'a+')
+		tiff = open("%s.tiff.txt" % self.input[:self.ext_index], 'a+')
 		
 		"""
 			because some versions of informacam will include the original exif,
@@ -180,7 +191,7 @@ class J3Mifier(threading.Thread):
 		# run ffmpeg command to dump result into a file called [fname].txt.b64
 		ffmpeg_cmd = [
 			"ffmpeg", "-y", "-dump_attachment:t", 
-			"%s.txt.b64" % self.input[:-4], 
+			"%s.txt.b64" % self.input[:self.ext_index], 
 			"-i", self.input
 		]
 		ffmpeg = ShellThreader(ffmpeg_cmd)
@@ -204,8 +215,8 @@ class J3Mifier(threading.Thread):
 		print "parsing j3m data"
 		
 		# un b64 [fname].txt.b64 and save as [fname].txt.unb64
-		b64 = open("%s.txt.b64" % self.input[:-4])
-		txt = open("%s.txt.unb64" % self.input[:-4], 'wb+')
+		b64 = open("%s.txt.b64" % self.input[:self.ext_index])
+		txt = open("%s.txt.unb64" % self.input[:self.ext_index], 'wb+')
 		
 		content = b64.read()
 		try:
@@ -218,7 +229,7 @@ class J3Mifier(threading.Thread):
 				txt.write(base64.b64decode(content))
 			except TypeError as e:
 				print e
-				print "could not unB64 this file (%s.txt.b64)" % self.input[:-4]
+				print "could not unB64 this file (%s.txt.b64)" % self.input[:self.ext_index]
 				txt.close()
 				b64.close()
 				return False
@@ -228,15 +239,19 @@ class J3Mifier(threading.Thread):
 
 		m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 		try:
-			file_type = m.id_filename("%s.txt.unb64" % self.input[:-4])
+			file_type = m.id_filename("%s.txt.unb64" % self.input[:self.ext_index])
 			print "DOC TYPE: %s" % file_type
 			m.close()
 
-			# if file is either PGP or GZIP
-			if file_type != mime_types['pgp'] and file_type != mime_types['gzip']:
+			# if file is either JSON, PGP or GZIP
+			accepted_mime_types = [
+				mime_types['pgp'], mime_types['gzip']
+			]
+			
+			if file_type not in accepted_mime_types:
 				print "NOT SUPPORTED FILE TYPE"
 				return False
-
+			
 			if file_type == mime_types['pgp']:
 				print "ATTEMPTING TO DECRYPT BLOB"
 				pwd = open(gnupg_pword, 'rb')
@@ -246,8 +261,8 @@ class J3Mifier(threading.Thread):
 
 				gpg_cmd = [
 					"gpg", "--no-tty", "--passphrase", passphrase,
-					"--output", "%s.j3m.gz" % self.input[:-4], 
-					"--decrypt", "%s.txt.unb64" % self.input[:-4],
+					"--output", "%s.j3m.gz" % self.input[:self.ext_index], 
+					"--decrypt", "%s.txt.unb64" % self.input[:self.ext_index],
 				]
 				gpg_thread = ShellThreader(gpg_cmd)
 				gpg_thread.start()
@@ -257,7 +272,7 @@ class J3Mifier(threading.Thread):
 				# check to see if this new output is a gzip
 				gpg_check = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 				try:
-					file_type = gpg_check.id_filename("%s.j3m.gz" % self.input[:-4])
+					file_type = gpg_check.id_filename("%s.j3m.gz" % self.input[:self.ext_index])
 					print "NEW DOC TYPE: %s" % file_type
 				except:
 					print "STILL FAILED TO DECRYPT"
@@ -265,12 +280,26 @@ class J3Mifier(threading.Thread):
 					return False
 
 				gpg_check.close()
-				if file_type != mime_types['gzip']:
+				if file_type not in [mime_types['gzip'], mime_types['zip']]:
+					print "NO, this is still wrong."
 					return False
+				
+				if file_type == mime_types['zip']:
+					# it is a j3m log!
+					print "WE HAVE A J3M LOG!"
+					os.rename(
+						"%s.j3m.gz" % self.input[:self.ext_index], 
+						"%s.j3m.zip" % self.input[:self.ext_index])
+					self.submission.file_name = "%s.j3m.zip" % self.submission.file_name[:self.ext_index]
+						
+					from j3mlogger import J3MLogger
+					J3MLogger(self.submission)
+					return
+				
 			elif file_type == mime_types['gzip']:
 				# this was already a gzip; skip
-				print "THIS WAS ALREADY A GZIP: %s.txt.unb64" % self.input[:-4]
-				os.rename("%s.txt.unb64" % self.input[:-4], "%s.j3m.gz" % self.input[:-4])
+				print "THIS WAS ALREADY A GZIP: %s.txt.unb64" % self.input[:self.ext_index]
+				os.rename("%s.txt.unb64" % self.input[:self.ext_index], "%s.j3m.gz" % self.input[:self.ext_index])
 			
 
 		except:
@@ -278,14 +307,14 @@ class J3Mifier(threading.Thread):
 			return False
 
 		# un gzip [fname].j3m.gz and save as [fname].j3m.orig
-		j3m = open("%s.j3m.orig" % self.input[:-4], 'wb+')
-		j3m.write(unGzipAsset("%s.j3m.gz" % self.input[:-4]))
+		j3m = open("%s.j3m.orig" % self.input[:self.ext_index], 'wb+')
+		j3m.write(unGzipAsset("%s.j3m.gz" % self.input[:self.ext_index]))
 		j3m.close()
 
 		# if [fname].j3m.orig is text/plain and is json-readable
 		m = magic.Magic(flags=magic.MAGIC_MIME_TYPE)
 		try:
-			file_type = m.id_filename("%s.j3m.orig" % self.input[:-4])
+			file_type = m.id_filename("%s.j3m.orig" % self.input[:self.ext_index])
 			m.close()
 		except:
 			m.close()
@@ -294,7 +323,7 @@ class J3Mifier(threading.Thread):
 		if file_type != mime_types['j3m']:
 			return False
 
-		f = open("%s.j3m.orig" % self.input[:-4], 'rb')
+		f = open("%s.j3m.orig" % self.input[:self.ext_index], 'rb')
 		j3m_data = f.read()
 		f.close()
 		
@@ -304,7 +333,7 @@ class J3Mifier(threading.Thread):
 		except KeyError as e:
 			return False
 		
-		f = open("%s.j3m.sig" % self.input[:-4], 'wb+')
+		f = open("%s.j3m.sig" % self.input[:self.ext_index], 'wb+')
 		f.write(j3m_sig)
 		f.close()
 
@@ -316,11 +345,11 @@ class J3Mifier(threading.Thread):
 		print "FINDING BACK SENTINEL at position %d" % j3m_data.rindex(back_sentinel)
 		extracted_j3m = j3m_data[len(front_sentinel) : j3m_data.rindex(back_sentinel)]
 
-		f = open("%s.j3m" % self.input[:-4], 'wb+')
+		f = open("%s.j3m" % self.input[:self.ext_index], 'wb+')
 		f.write(extracted_j3m)
 		f.close()
 
-		j3m_asset = J3M(path_to_j3m="%s.j3m" % self.input[:-4])
+		j3m_asset = J3M(path_to_j3m="%s.j3m" % self.input[:self.ext_index])
 		self.submission.j3m_id = j3m_asset._id
 		self.submission.save()
 		return True
@@ -357,15 +386,15 @@ class J3Mifier(threading.Thread):
 		ffmpeg_cmd = [
 			"ffmpeg", "-y", "-i", self.input,
 			"-vcodec", "copy", "-acodec", "copy",
-			"%s.mp4" % self.input[:-4]
+			"%s.mp4" % self.input[:self.ext_index]
 		]
 		ffmpeg = ShellThreader(ffmpeg_cmd)
 		ffmpeg.start()
 		ffmpeg.join()
 
 		hires_cmd = [
-			"cp", "%s.mp4" % self.input[:-4],
-			os.path.join(self.output, "high_%s.mp4" % self.file_name[:-4])
+			"cp", "%s.mp4" % self.input[:self.ext_index],
+			os.path.join(self.output, "high_%s.mp4" % self.file_name[:self.ext_index])
 		]
 		hires = ShellThreader(hires_cmd)
 		hires.start()
@@ -373,7 +402,7 @@ class J3Mifier(threading.Thread):
 		print hires_cmd
 
 		ogv_cmd = [
-			"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "high_%s" % self.file_name[:-4])
+			"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "high_%s" % self.file_name[:self.ext_index])
 		]
 		print ogv_cmd
 		ogv = ShellThreader(ogv_cmd)
@@ -384,16 +413,16 @@ class J3Mifier(threading.Thread):
 			label = resolution.keys()[0]
 
 			ffmpeg_cmd = [
-				"ffmpeg", "-y", "-i", "%s.mp4" % self.input[:-4],
+				"ffmpeg", "-y", "-i", "%s.mp4" % self.input[:self.ext_index],
 				"-filter:v", "scale=%d:%d" % (resolution[label][0], resolution[label][1]),
-				"-acodec", "copy", "%s.mp4" % os.path.join(self.output, "%s%s" % (label, self.file_name))[:-4]
+				"-acodec", "copy", "%s.mp4" % os.path.join(self.output, "%s%s" % (label, self.file_name))[:self.ext_index]
 			]
 			ffmpeg = ShellThreader(ffmpeg_cmd)
 			ffmpeg.start()
 			ffmpeg.join()
 
 			ogv_cmd = [
-				"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "%s%s" % (label, self.file_name))[:-4]
+				"ffmpeg2theora", "%s.mp4" % os.path.join(self.output, "%s%s" % (label, self.file_name))[:self.ext_index]
 			]
 			ogv = ShellThreader(ogv_cmd)
 			ogv.start()
@@ -401,9 +430,9 @@ class J3Mifier(threading.Thread):
 
 
 		ffmpeg_cmd = [
-			"ffmpeg", "-y", "-i", "%s.mp4" % self.input[:-4],
+			"ffmpeg", "-y", "-i", "%s.mp4" % self.input[:self.ext_index],
 			"-f", "image2", "-ss", "0.342", "-vframes", "1",
-			os.path.join(self.output, "thumb_%s.jpg" % self.file_name[:-4])
+			os.path.join(self.output, "thumb_%s.jpg" % self.file_name[:self.ext_index])
 		]
 		ffmpeg = ShellThreader(ffmpeg_cmd)
 		ffmpeg.start()
