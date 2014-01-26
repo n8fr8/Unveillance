@@ -91,6 +91,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 	
 	for client in clients:
 		if not client.usable:
+			print "client not usable"
 			continue
 			
 		for asset in client.listAssets(omit_absorbed=True):		

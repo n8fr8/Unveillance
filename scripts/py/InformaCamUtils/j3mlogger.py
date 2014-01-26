@@ -8,6 +8,7 @@ class J3MLogger():
 	def __init__(self, submission):
 		from InformaCamModels.submission import Submission
 		from InformaCamModels.collection import Collection
+		from InformaCamModels.j3m import J3M
 		
 		# unzip
 		self.asset_path = submission.asset_path.replace("/submissions/","/collections/")
@@ -26,15 +27,11 @@ class J3MLogger():
 		unzip.join()
 		print unzip.output
 		
-		'''		
-		unzip_output = ['Archive:  /home/ubuntu/assets/submissions/ff4d54bbbceb4ca95106d85e2f38e8e9/0B_D7fbraOf5HeXpDV0VCM0dRQVk.j3mlog', '  inflating: /home/ubuntu/assets/collections/ff4d54bbbceb4ca95106d85e2f38e8e9/log.j3m  ', '  inflating: /home/ubuntu/assets/collections/ff4d54bbbceb4ca95106d85e2f38e8e9/1387543600423_selfie-1943498071.jpg  ', '  inflating: /home/ubuntu/assets/collections/ff4d54bbbceb4ca95106d85e2f38e8e9/informaCaches/fa2f38e4faa783c7049641f600b4d308  ', '  inflating: /home/ubuntu/assets/collections/ff4d54bbbceb4ca95106d85e2f38e8e9/1387543600401_selfie-82254992.jpg  ']
-		'''
-
 		assets = []
-		
 		media = []
 		sensor_captures = []
 		j3m_verified = False
+		j3m = None
 		
 		rx = r'\s*inflating: (.*)'
 		for line in unzip.output:
@@ -51,6 +48,7 @@ class J3MLogger():
 			if j3m_match is not None:
 				print "J3M: %s" % asset
 				j3m_verified = self.validateManifest()
+				j3m = J3M(path_to_j3m="%s.manifest" % asset)				
 				
 			cache_match = re.match(r_caches, asset)
 			if cache_match is not None:
@@ -84,19 +82,22 @@ class J3MLogger():
 						print e
 						return
 		
-		'''
+		inflate = {'_id' : submission._id}
+		
 		if len(media) > 0:
-			collection = Collection(inflate={
-				'_id' : submission._id,
-				'submissions' : media,
-				'sensor_captures' : sensor_captures
-			})
-			
-			print collection._id
+			inflate['submissions'] = media
+		
+		if len(sensor_captures) > 0:
+			inflate['sensor_captures'] = sensor_captures
+		
+		if j3m is not None:
+			inflate['j3m_id'] = j3m._id
+
+		collection = Collection(inflate=inflate)	
+		print "NEW COLLECTION: %s" % collection._id
 			
 		# delete self as submission
 		submission.delete()
-		'''
 		
 	def validateManifest(self):
 		f = open(os.path.join(self.asset_path, "log.j3m"), 'rb')
