@@ -57,7 +57,7 @@ def reindex():
 							source = Source(inflate=data, reindex=True)
 					except exceptions.ConnectionError as e:
 						print e
-						sys.exit()
+						return
 					except AttributeError as e:
 						continue
 				#break
@@ -114,7 +114,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 					source = Source(inflate=data)
 				except exceptions.ConnectionError as e:
 					print e
-					sys.exit(0)
+					return
 					
 				if hasattr(source, "invalid"):
 					print source.invalid
@@ -136,7 +136,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 				file_name_segments = getBespokeFileExtension(data['file_name'])
 				if file_name_segments is None:
 					print "could not map file extension for %s" % data['file_name']
-					sys.exit(0)
+					file_name_segments = ['']
 				
 				if file_name_segments[-1] != client.mime_type_map[mime_type]:
 					data['file_name'] = "%s.%s" % (
@@ -148,7 +148,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 					submission = Submission(inflate=data)
 				except exceptions.ConnectionError as e:
 					print e
-					sys.exit(0)
+					return
 					
 				if hasattr(submission, "invalid"):
 					print submission.invalid
