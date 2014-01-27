@@ -82,7 +82,10 @@ class J3MLogger():
 						print e
 						return
 		
-		inflate = {'_id' : submission._id}
+		inflate = {
+			'_id' : submission._id,
+			'asset_path' : self.asset_path
+		}
 		
 		if len(media) > 0:
 			inflate['submissions'] = media
@@ -92,6 +95,7 @@ class J3MLogger():
 		
 		if j3m is not None:
 			inflate['j3m_id'] = j3m._id
+			inflate['dateCreated'] = j3m.genealogy['dateCreated']
 
 		collection = Collection(inflate=inflate)	
 		print "NEW COLLECTION: %s" % collection._id

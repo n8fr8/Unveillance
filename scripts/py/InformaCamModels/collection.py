@@ -10,21 +10,19 @@ class Collection(Asset):
 			
 			inflate = self.massageData(inflate)
 		
-		# submissions, sensor_captures
 		super(Collection, self).__init__(inflate=inflate, _id=_id, river="collections")
 	
 	def massageData(self, inflate):
-
-		
 		try:
-			sensor_captures = inflate['sensor_captures']
-			del inflate['sensor_captures']
+			submissions = inflate['submissions']
+			from submission import Submission
 			
-			for sensor_capture in sensor_captures:
-				print sensor_capture
+			inflate['contributors'] = []
+			for s in submissions:
+				submission = Submission(_id=s)
+				inflate['contributors'].append(
+					submission.j3m.genealogy['createdOnDevice'])
 				
-					
-				# copy over to /data
 		except KeyError as e:
 			print e
 			pass
