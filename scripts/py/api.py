@@ -90,6 +90,12 @@ class Collection(tornado.web.RequestHandler):
 			
 			if not hasattr(collection, "invalid"):
 				res.data = collection.emit()
+				
+				if hasattr(collection, 'j3m'):
+					res.data['primary_j3m'] = collection.j3m.emit()
+				else:
+					print "NO primary j3m?"
+
 				res.result = 200
 			else:
 				res.reason = collection.invalid

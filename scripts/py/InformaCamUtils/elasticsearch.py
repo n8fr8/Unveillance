@@ -1,4 +1,7 @@
 import requests, copy, json, sys, os, re, time, datetime, hashlib
+from collections import namedtuple
+
+KVP = namedtuple("KVP", "key val")
 
 class Elasticsearch():
 	def __init__(self, river=None):
@@ -63,13 +66,18 @@ class Elasticsearch():
 			},
 			"collections" : {
 				"properties" : {
-					"submissions" : {
-						"type" : "nested",
+					"attached_media" : {
+						"type" : "string",
 						"include_in_parent" : True,
 						"include_in_root" : True
 					},
 					"sensor_captures" : {
-						"type" : "nested",
+						"type" : "string",
+						"include_in_parent" : True,
+						"include_in_root" : True
+					},
+					"contributors" : {
+						"type" : "string",
 						"include_in_parent" : True,
 						"include_in_root" : True
 					}
@@ -177,6 +185,34 @@ class Elasticsearch():
 			return res['ok']
 		except:
 			return False	
+	
+	def queryLiteral(self, query, river=None, extra_params=None):
+		if river is None:
+			river = self.river
+		
+		url = "%s%s_search" % (self.el, river)
+		
+		if extra_params is not None:
+			append_to_url = []
+			for p in extra_params:
+				append_to_url.append("%s=%s" % (p.key, p.val))
+			
+			url += "?%s" % "&".join(append_to_url)
+		
+		r = requests.get(url, data=query)
+		res = json.loads(r.text)
+		proc_res = []
+		
+		try:
+			print len(res['hits']['hits'])
+			for hit in res['hits']['hits']:
+				proc_res.append(hit['_source'])
+		except:
+			print "0 hits (query invalid)"
+		
+		if len(proc_res) == 0:
+			return False
+		return proc_res
 	
 	def query(self, params):
 		url = "%s%s/_search?size=50" % (self.el, self.river)

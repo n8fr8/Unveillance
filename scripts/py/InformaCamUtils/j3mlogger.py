@@ -88,7 +88,7 @@ class J3MLogger():
 		}
 		
 		if len(media) > 0:
-			inflate['submissions'] = media
+			inflate['attached_media'] = media
 		
 		if len(sensor_captures) > 0:
 			inflate['sensor_captures'] = sensor_captures
