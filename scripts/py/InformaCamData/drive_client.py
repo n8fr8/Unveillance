@@ -152,9 +152,7 @@ class DriveClient(InformaCamDataClient):
 					).execute()
 					print "deleted original file over %s" % f['id']
 					sleep(2)
-				except errors.HttpError as e:
-					print e
-					continue
+				except errors.HttpError as e: print e
 				
 				assets.append(clone['id'])
 		
