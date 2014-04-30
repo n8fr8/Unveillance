@@ -101,8 +101,21 @@ class Asset():
 		}
 		self.save()
 		
-	def delete(self):
+	def delete(self, deleteAssets=False):
 		self.es.delete(self)
+		
+		if deleteAssets and hasattr(self, 'asset_path'):
+			from conf import assets_root
+			pardir = os.path.abspath(os.path.join(self.asset_path, os.pardir))
+			
+			if pardir in [
+				os.path.join(assets_root, "submissions"), 
+				os.path.join(assets_root, "sources"),
+				os.path.join(assets_root, "data")]:
+				
+				print "DELETING %s!" % self._id
+				import shutil
+				shutil.rmtree(self.asset_path)
 		
 	def emit(self, exclude=None):
 		emit = {}

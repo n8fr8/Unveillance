@@ -8,6 +8,7 @@ from conf import assets_root, forms_root
 class J3M(Asset):
 	def __init__(self, path_to_j3m=None, _id=None, inflate=None):		
 		if _id is None and path_to_j3m is not None:
+			print "PATH TO J3M: %s" % path_to_j3m
 			j = open(path_to_j3m, 'rb')
 			try:
 				data = json.loads(j.read())

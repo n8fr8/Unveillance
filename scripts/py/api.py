@@ -10,6 +10,7 @@ from conf import log_root
 
 from InformaCamModels.source import Source as ICSource
 from InformaCamModels.submission import Submission as ICSubmission
+from InformaCamModels.collection import Collection as ICCollection
 from InformaCamUtils.funcs import parseRequest, parseArguments, passesParameterFilter, gzipAsset
 from InformaCamUtils.elasticsearch import Elasticsearch
 
@@ -32,6 +33,74 @@ class Ping(tornado.web.RequestHandler):
 		res = Res()
 		res.result = 200
 		self.write(res.emit())
+
+class Collections(tornado.web.RequestHandler):
+	def get(self):
+		res = Res()
+		q = False
+		
+		clauses = []
+		op = None
+		
+		print urllib2.unquote(self.request.query)
+		for k,v in parseRequest(urllib2.unquote(self.request.query)).iteritems():
+			if k == "operator":
+				op = v
+			else:
+				clauses.append({
+					"field" : k,
+					k : v
+				})
+		
+		el = Elasticsearch(river="collections")
+		
+		if len(clauses) == 1:
+			q = el.query({"clauses" : clauses})
+		elif len(clauses) == 0:
+			q = el.query({
+				"clauses": [
+					{
+						"field" : "get_all",
+						"get_all" : False
+					}
+				]
+			})
+		else:
+			if op is None: op = "and"
+			q = el.query({
+				"operator" : op,
+				"clauses" : clauses
+			})
+
+		if q is not False:
+			res.data = q
+			res.result = 200
+
+		self.finish(res.emit())
+
+class Collection(tornado.web.RequestHandler):
+	def initialize(self, _id):
+		self._id = _id
+		
+	def get(self, _id):
+		res = Res()
+		
+		if passesParameterFilter(_id):
+			collection = ICCollection(_id=_id)
+			
+			if not hasattr(collection, "invalid"):
+				res.data = collection.emit()
+				
+				if hasattr(collection, 'j3m'):
+					res.data['primary_j3m'] = collection.j3m.emit()
+				else:
+					print "NO primary j3m?"
+
+				res.result = 200
+			else:
+				res.reason = collection.invalid
+				
+		self.finish(res.emit())
 		
 class Submissions(tornado.web.RequestHandler):
 	def get(self):
@@ -263,6 +332,8 @@ routes = [
 	(r"/source/([a-zA-Z0-9]{32})/", Source, dict(_id=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/media/(low|med|high|thumb|orig)/", MediaHandler, dict(_id=None, resolution=None)),
 	(r"/submission/([a-zA-Z0-9]{32})/j3m/", J3MHandler, dict(_id=None)),
+	(r"/collections/", Collections),
+	(r"/collection/([a-zA-Z0-9]{32})/", Collection, dict(_id=None)),
 	(r"/ictd/", GenerateICTD),
 	(r"/import/", ImportHandler)
 ]
