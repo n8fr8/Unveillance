@@ -94,11 +94,13 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 			print "client not usable"
 			continue
 			
-		for asset in client.listAssets(omit_absorbed=True):		
+		for asset in client.listAssets(omit_absorbed=False):		
 			mime_type = client.getAssetMimeType(asset)		
 			if not mime_type in client.mime_types.itervalues():
 				continue
-			
+		
+			print "got asset type %s" % mime_type
+	
 			if mime_type == client.mime_types['zip']:
 				if only_submissions:
 					continue

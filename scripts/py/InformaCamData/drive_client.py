@@ -67,6 +67,9 @@ class DriveClient(InformaCamDataClient):
 		return True
 		
 	def getFile(self, fileId):
+
+		print "getting file %s" % fileId
+
 		super(DriveClient, self).getFile(fileId)
 		
 		try:
@@ -79,8 +82,11 @@ class DriveClient(InformaCamDataClient):
 			return self.pullFile(self.getFile(file))
 			
 		super(DriveClient, self).pullFile(file)
-		
+
 		url = file.get('downloadUrl')
+
+		print "pulling file %s" % url
+
 		if url:
 			response, content = self.service._http.request(url)
 			if response.status == 200:
@@ -116,11 +122,13 @@ class DriveClient(InformaCamDataClient):
 		
 		print self.mime_types
 		for f in files['items']:
+			print f['id']
 			print f['mimeType']
 			if f['mimeType'] in self.mime_types.itervalues() and f['mimeType'] != self.mime_types['folder']:
 			
 				# if is absorbed already,
 				if omit_absorbed and self.isAbsorbed(f['id'], f['mimeType']):
+					print "entry is already absorbed %s" % f['id']
 					continue
 					
 				try:
@@ -145,15 +153,19 @@ class DriveClient(InformaCamDataClient):
 				except errors.HttpError as e:
 					print e
 					continue
-					
+				"""					
 				try:
+		
+					print "attempting delete original file %s" % f['id']
 					print self.service.files().delete(
 						fileId=f['id']
 					).execute()
 					print "deleted original file over %s" % f['id']
 					sleep(2)
-				except errors.HttpError as e: print e
-				
+				except errors.HttpError as e:
+					print e
+					continue
+				"""
 				assets.append(clone['id'])
 		
 		self.last_update_for_mode = time() * 1000
@@ -193,7 +205,9 @@ class DriveClient(InformaCamDataClient):
 			return self.getFileName(self.getFile(file))
 		
 		super(DriveClient, self).getFileName(file['title'])
-			
+	
+		print "got filename %s" % str(file['title'])
+		
 		return str(file['title'])
 		
 	def getFileNameHash(self, file):
