@@ -22,3 +22,6 @@
 [submodule "packages/JavaMediaHasher"]
 	path = packages/JavaMediaHasher
 	url = https://github.com/n8fr8/JavaMediaHasher.git
+[submodule "packages/j3mifier"]
+	path = packages/j3mifier
+	url = https://github.com/harlo/j3mifier.git
