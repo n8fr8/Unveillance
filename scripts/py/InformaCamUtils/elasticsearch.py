@@ -442,6 +442,17 @@ class Elasticsearch():
 										}
 									}
 								}						
+						elif clause['field'] == "hashes":
+							if re.match(r'[a-zA-Z0-9]{40}', clause['hashes']):
+								c = {
+									"bool" : {
+										"must" : {
+											"term" : {
+												"hashes" : clause['hashes']
+											}
+										}
+									}
+								}						
 						elif clause['field'] == "keyword":
 							continue
 						elif clause['field'] == "fingerprint":
