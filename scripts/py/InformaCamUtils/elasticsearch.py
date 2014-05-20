@@ -443,7 +443,7 @@ class Elasticsearch():
 									}
 								}						
 						elif clause['field'] == "hashes":
-							if re.match(r'[a-zA-Z0-9]{40}', clause['hashes']):
+							if re.match(r'[a-zA-Z0-9]', clause['hashes']):
 								c = {
                                                                         "bool" : {
                                                                                 "should" : [
