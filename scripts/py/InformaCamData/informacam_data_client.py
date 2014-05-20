@@ -65,7 +65,7 @@ class InformaCamDataClient():
 			file_id (string)
 				usually an id for the file
 		"""
-		#print "getting file %s" % file_id
+		#print "getting generic file %s" % file_id
 		pass
 		
 	def absorb(self, file):

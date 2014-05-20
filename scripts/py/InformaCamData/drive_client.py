@@ -42,6 +42,7 @@ class DriveClient(InformaCamDataClient):
 		try:
 			files = self.service.children().list(folderId=drive['asset_root']).execute()
 			self.files_manifest = []
+			print "scanning files in 'items'"
 			for f in files['items']:
 				self.files_manifest.append(self.getFile(f['id']))
 
@@ -68,7 +69,7 @@ class DriveClient(InformaCamDataClient):
 		
 	def getFile(self, fileId):
 
-		print "getting file %s" % fileId
+		print "getting file from gdrive %s" % fileId
 
 		super(DriveClient, self).getFile(fileId)
 		
@@ -85,7 +86,7 @@ class DriveClient(InformaCamDataClient):
 
 		url = file.get('downloadUrl')
 
-		print "pulling file %s" % url
+		print "pulling file from gdrive %s" % url
 
 		if url:
 			response, content = self.service._http.request(url)
@@ -116,6 +117,7 @@ class DriveClient(InformaCamDataClient):
 		q = {'q' : 'sharedWithMe'}
 		try:
 			files = self.service.files().list(**q).execute()
+
 		except errors.HttpError as e:
 			print e
 			return False
@@ -130,7 +132,7 @@ class DriveClient(InformaCamDataClient):
 				if omit_absorbed and self.isAbsorbed(f['id'], f['mimeType']):
 					print "entry is already absorbed %s" % f['id']
 					continue
-					
+				
 				try:
 					clone = self.service.files().copy(
 						fileId=f['id'],

@@ -97,6 +97,7 @@ def watch(only_sources=False, only_submissions=False, only_imports=False):
 		for asset in client.listAssets(omit_absorbed=False):		
 			mime_type = client.getAssetMimeType(asset)		
 			if not mime_type in client.mime_types.itervalues():
+				print "found file with incorrect mime-type: %s" % mime_type
 				continue
 		
 			print "got asset type %s" % mime_type
