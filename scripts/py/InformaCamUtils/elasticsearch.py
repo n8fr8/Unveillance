@@ -445,14 +445,17 @@ class Elasticsearch():
 						elif clause['field'] == "hashes":
 							if re.match(r'[a-zA-Z0-9]{40}', clause['hashes']):
 								c = {
-									"bool" : {
-										"must" : {
-											"term" : {
-												"hashes" : clause['hashes']
-											}
-										}
-									}
-								}						
+                                                                        "bool" : {
+                                                                                "should" : [
+                                                                                        {
+                                                                                                "term" : { "hashes" : clause['hashes'] }
+                                                                                        },
+                                                                                        {
+                                                                                                "term" : { "public_hash" : clause['hashes'] }
+                                                                                        }
+                                                                                ]
+                                                                        }
+                                                                }
 						elif clause['field'] == "keyword":
 							continue
 						elif clause['field'] == "fingerprint":
@@ -497,7 +500,10 @@ class Elasticsearch():
 			if query['query'] is None:
 				print "so query['query'] is none"
 				if clause.keys()[0] == "bool":
-					query['query'] = clause['bool']['must']
+					if clause['bool'].keys()[0] == "must":
+                                                query['query'] = clause['bool']['must']
+                                        else:
+                                                query['query'] = clause
 				elif clause.keys()[0] == "geo_distance":
 					query['query'] = match_all
 					query['filters']['geo_distance'] = clause['geo_distance']
